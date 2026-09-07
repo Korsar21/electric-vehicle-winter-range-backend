@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vehicle Auxiliary Load Feed</title>
+</head>
+<body>
+
+<h1>{{ .Load.Name }}</h1>
+
+<p>ID: {{ .Load.ID }}</p>
+<p>{{ .Load.Description }}</p>
+
+<p>Category: {{ .Load.Category }}</p>
+<p>Power Draw: {{ .Load.PowerDrawW }} W</p>
+<p>Likes: {{ .Load.LikeCount }}</p>
+
+<img
+    src="{{ .Load.ImageURL }}"
+    alt="{{ .Load.Name }}"
+    width="300"
+>
+
+<br>
+
+<video
+    src="{{ .Load.VideoURL }}"
+    width="300"
+    autoplay
+    muted
+    loop
+    controls>
+</video>
+
+<p>
+    <a href="/vehicle-auxiliary-loads/feed?id={{ .Load.ID }}&next=true">
+        Next →
+    </a>
+</p>
+
+<hr>
+
+<nav>
+    <a href="/vehicle-auxiliary-loads/feed">Feed</a>
+    |
+    <a href="/vehicle-auxiliary-loads/draft">Add</a>
+    |
+    <a href="/vehicle-auxiliary-loads">Grid</a>
+</nav>
+
+</body>
+</html>

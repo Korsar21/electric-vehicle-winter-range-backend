@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Draft Auxiliary Load</title>
+</head>
+<body>
+
+<h1>Draft Auxiliary Load</h1>
+
+<img
+    src="{{ .Load.ImageURL }}"
+    alt="{{ .Load.Name }}"
+    width="300"
+>
+
+<p>
+    <label>
+        Name:
+        <input
+            type="text"
+            value="{{ .Load.Name }}"
+        >
+    </label>
+</p>
+
+<p>
+    <label>
+        Description:
+        <textarea>{{ .Load.Description }}</textarea>
+    </label>
+</p>
+
+<p>
+    <label>
+        Category:
+        <input
+            type="text"
+            value="{{ .Load.Category }}"
+        >
+    </label>
+</p>
+
+<p>
+    <label>
+        Power Draw:
+        <input
+            type="number"
+            value="{{ .Load.PowerDrawW }}"
+        >
+    </label>
+</p>
+
+<p>
+    <label>
+        Image:
+        <input type="text" value="{{ .Load.ImageURL }}">
+    </label>
+</p>
+
+<p>
+    <label>
+        Video:
+        <input type="text" value="{{ .Load.VideoURL }}">
+    </label>
+</p>
+
+<p>Status: {{ .Load.Status }}</p>
+
+<p>Saving available later</p>
+
+<hr>
+
+<nav>
+    <a href="/vehicle-auxiliary-loads/feed">Feed</a>
+    |
+    <a href="/vehicle-auxiliary-loads/draft">Add</a>
+    |
+    <a href="/vehicle-auxiliary-loads">Grid</a>
+</nav>
+
+</body>
+</html>

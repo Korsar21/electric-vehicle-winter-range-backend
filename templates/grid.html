@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Winter Auxiliary Loads</title>
+</head>
+<body>
+
+<h1>Winter Auxiliary Loads</h1>
+
+<form
+    method="GET"
+    action="/vehicle-auxiliary-loads">
+
+    <label for="maxPowerW">
+        Maximum Power Draw:
+        {{ .MaxPowerW }} W
+    </label>
+
+    <br>
+
+    <input
+        id="maxPowerW"
+        name="maxPowerW"
+        type="range"
+        min="0"
+        max="5000"
+        step="50"
+        value="{{ .MaxPowerW }}"
+    >
+
+    <button type="submit">
+        Apply
+    </button>
+
+</form>
+
+<hr>
+
+{{ range .Loads }}
+
+<div>
+
+    <a href="/vehicle-auxiliary-loads/feed?id={{ .ID }}">
+
+        <img
+            src="{{ .ImageURL }}"
+            alt="{{ .Name }}"
+            width="180"
+        >
+
+        <h2>{{ .Name }}</h2>
+
+    </a>
+
+    <p>{{ .PowerDrawW }} W</p>
+
+    <p>♥ {{ .LikeCount }}</p>
+
+</div>
+
+{{ end }}
+
+<hr>
+
+<nav>
+    <a href="/vehicle-auxiliary-loads/feed">Feed</a>
+    |
+    <a href="/vehicle-auxiliary-loads/draft">Add</a>
+    |
+    <a href="/vehicle-auxiliary-loads">Grid</a>
+</nav>
+
+</body>
+</html>

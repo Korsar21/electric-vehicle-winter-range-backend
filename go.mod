@@ -2,7 +2,10 @@ module github.com/Korsar21/electric-vehicle-winter-range-backend
 
 go 1.26.5
 
-require github.com/gin-gonic/gin v1.12.0
+require (
+	github.com/gin-gonic/gin v1.12.0
+	github.com/sirupsen/logrus v1.10.2
+)
 
 require (
 	github.com/bytedance/gopkg v0.1.3 // indirect
