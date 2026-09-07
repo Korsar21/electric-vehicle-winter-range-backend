@@ -41,8 +41,7 @@ func NewRepository() (*Repository, error) {
 		{
 			ID:          1,
 			Name:        "Cabin Heater",
-			Description: "High-power cabin heating system used to maintain passenger comfort in sub-zero temperatures.",
-			Category:    "Heating",
+			Description: "High-power cabin heating system used to maintain passenger comfort in sub-zero temperatures. In severe winter conditions it can become one of the largest auxiliary electrical loads and noticeably reduce the available driving range.", Category: "Heating",
 			PowerDrawW:  4500,
 			Status:      StatusPublished,
 			LikeUserIDs: generateLikeUserIDs(1000, 128),
@@ -52,8 +51,7 @@ func NewRepository() (*Repository, error) {
 		{
 			ID:          2,
 			Name:        "Front Seat Heater",
-			Description: "Localized seat heating that provides passenger comfort with substantially lower power demand than whole-cabin heating.",
-			Category:    "Heating",
+			Description: "Localized electric heating built into the front seat cushion and backrest. It provides direct passenger comfort while consuming substantially less electrical power than heating the entire vehicle cabin.", Category: "Heating",
 			PowerDrawW:  150,
 			Status:      StatusPublished,
 			LikeUserIDs: generateLikeUserIDs(2000, 84),
@@ -63,8 +61,7 @@ func NewRepository() (*Repository, error) {
 		{
 			ID:          4,
 			Name:        "Steering Wheel Heater",
-			Description: "Localized steering wheel heating used to improve driver comfort in cold weather.",
-			Category:    "Heating",
+			Description: "Localized electric heating around the steering wheel rim improves driver comfort in cold weather. Its relatively low power demand makes it more energy-efficient than increasing whole-cabin temperature.", Category: "Heating",
 			PowerDrawW:  50,
 			Status:      StatusPublished,
 			LikeUserIDs: generateLikeUserIDs(3000, 61),
@@ -74,8 +71,7 @@ func NewRepository() (*Repository, error) {
 		{
 			ID:          7,
 			Name:        "Windshield Defroster",
-			Description: "Electrical windshield heating used to remove frost and maintain visibility in winter conditions.",
-			Category:    "Visibility",
+			Description: "Electrical windshield heating removes frost and ice and helps maintain forward visibility during winter operation. The system increases auxiliary electrical consumption while it is active.", Category: "Visibility",
 			PowerDrawW:  540,
 			Status:      StatusPublished,
 			LikeUserIDs: generateLikeUserIDs(4000, 97),
@@ -85,8 +81,7 @@ func NewRepository() (*Repository, error) {
 		{
 			ID:          9,
 			Name:        "Battery Heater",
-			Description: "Battery thermal-management heater used to warm the traction battery in low ambient temperatures.",
-			Category:    "Battery Thermal Management",
+			Description: "Battery thermal-management heater warms the traction battery at low ambient temperatures. Maintaining a suitable battery temperature supports charging and power performance but consumes additional stored energy.", Category: "Battery Thermal Management",
 			PowerDrawW:  1000,
 			Status:      StatusPublished,
 			LikeUserIDs: generateLikeUserIDs(5000, 73),
@@ -209,4 +204,24 @@ func (r *Repository) GetFirstPublishedVehicleAuxiliaryLoad() (VehicleAuxiliaryLo
 	return VehicleAuxiliaryLoad{}, fmt.Errorf(
 		"published vehicle auxiliary load not found",
 	)
+}
+
+func (r *Repository) HasNextPublishedVehicleAuxiliaryLoad(id int) bool {
+	currentFound := false
+
+	for _, load := range r.vehicleAuxiliaryLoads {
+		if load.Status != StatusPublished {
+			continue
+		}
+
+		if currentFound {
+			return true
+		}
+
+		if load.ID == id {
+			currentFound = true
+		}
+	}
+
+	return false
 }

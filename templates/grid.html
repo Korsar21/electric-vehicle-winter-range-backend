@@ -2,74 +2,168 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Winter Auxiliary Loads</title>
-</head>
-<body>
 
-<h1>Winter Auxiliary Loads</h1>
-
-<form
-    method="GET"
-    action="/vehicle-auxiliary-loads">
-
-    <label for="maxPowerW">
-        Maximum Power Draw:
-        {{ .MaxPowerW }} W
-    </label>
-
-    <br>
-
-    <input
-        id="maxPowerW"
-        name="maxPowerW"
-        type="range"
-        min="0"
-        max="5000"
-        step="50"
-        value="{{ .MaxPowerW }}"
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
     >
 
-    <button type="submit">
-        Apply
-    </button>
+    <title>Winter Auxiliary Loads</title>
 
-</form>
+    <link
+        rel="stylesheet"
+        href="/static/styles/main.css"
+    >
+</head>
 
-<hr>
+<body>
 
-{{ range .Loads }}
+<div class="app-shell">
 
-<div>
+    <main class="page-scroll">
 
-    <a href="/vehicle-auxiliary-loads/feed?id={{ .ID }}">
+        <header class="page-header">
 
-        <img
-            src="{{ .ImageURL }}"
-            alt="{{ .Name }}"
-            width="180"
-        >
+            <h1 class="page-title">
+                Winter Auxiliary Loads
+            </h1>
 
-        <h2>{{ .Name }}</h2>
+        </header>
 
-    </a>
+        <form
+            class="grid-filter"
+            method="GET"
+            action="/vehicle-auxiliary-loads">
 
-    <p>{{ .PowerDrawW }} W</p>
+            <div class="filter-row">
 
-    <p>♥ {{ .LikeCount }}</p>
+                <span>
+                    Max Power Limit
+                </span>
+
+                <span class="filter-value">
+                    {{ .MaxPowerW }} W
+                </span>
+
+            </div>
+
+            <input
+                class="power-range"
+                id="maxPowerW"
+                name="maxPowerW"
+                type="range"
+                min="0"
+                max="5000"
+                step="50"
+                value="{{ .MaxPowerW }}"
+            >
+
+            <div class="range-labels">
+
+                <span>
+                    0 W
+                </span>
+
+                <span>
+                    5000 W
+                </span>
+
+            </div>
+
+            <button
+                class="filter-button"
+                type="submit">
+
+                Apply Filter
+
+            </button>
+
+        </form>
+
+        <section class="load-grid">
+
+            {{ range .Loads }}
+
+            <article
+    class="load-card"
+    data-image-url="{{ .ImageURL }}"
+    data-video-url="{{ .VideoURL }}">
+
+                <a
+                    class="load-card-link"
+                    href="/vehicle-auxiliary-loads/feed?id={{ .ID }}">
+
+                    <img
+                        class="load-card-image"
+                        src="{{ .ImageURL }}"
+                        alt="{{ .Name }}"
+                    >
+
+                    <div class="load-card-body">
+
+                        <h2 class="load-card-title">
+                            {{ .Name }}
+                        </h2>
+
+                        <div class="load-card-meta">
+
+                            <span class="load-power">
+                                {{ .PowerDrawW }} W
+                            </span>
+
+                            <span class="load-likes">
+                                ♡ {{ .LikeCount }}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </article>
+
+            {{ end }}
+
+        </section>
+
+    </main>
+
+    <nav class="bottom-nav">
+
+        <a
+            class="nav-item"
+            href="/vehicle-auxiliary-loads/feed">
+
+            <span class="nav-icon">▦</span>
+
+            Feed
+
+        </a>
+
+        <a
+            class="nav-item"
+            href="/vehicle-auxiliary-loads/draft">
+
+            <span class="nav-icon">⊕</span>
+
+            Add
+
+        </a>
+
+        <a
+            class="nav-item active"
+            href="/vehicle-auxiliary-loads">
+
+            <span class="nav-icon">▦</span>
+
+            Grid
+
+        </a>
+
+    </nav>
 
 </div>
-
-{{ end }}
-
-<hr>
-
-<nav>
-    <a href="/vehicle-auxiliary-loads/feed">Feed</a>
-    |
-    <a href="/vehicle-auxiliary-loads/draft">Add</a>
-    |
-    <a href="/vehicle-auxiliary-loads">Grid</a>
-</nav>
 
 </body>
 </html>

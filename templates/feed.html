@@ -2,51 +2,147 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Vehicle Auxiliary Load Feed</title>
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>{{ .Load.Name }}</title>
+
+    <link
+        rel="stylesheet"
+        href="/static/styles/main.css"
+    >
 </head>
+
 <body>
 
-<h1>{{ .Load.Name }}</h1>
+<div class="app-shell">
 
-<p>ID: {{ .Load.ID }}</p>
-<p>{{ .Load.Description }}</p>
+    <main class="feed-page">
 
-<p>Category: {{ .Load.Category }}</p>
-<p>Power Draw: {{ .Load.PowerDrawW }} W</p>
-<p>Likes: {{ .Load.LikeCount }}</p>
+        <video
+            class="feed-video"
+            src="{{ .Load.VideoURL }}"
+            poster="{{ .Load.ImageURL }}"
+            autoplay
+            muted
+            loop
+            playsinline>
+        </video>
 
-<img
-    src="{{ .Load.ImageURL }}"
-    alt="{{ .Load.Name }}"
-    width="300"
->
+        <div class="feed-gradient"></div>
 
-<br>
+        <img
+            class="feed-thumbnail"
+            src="{{ .Load.ImageURL }}"
+            alt="{{ .Load.Name }}"
+        >
 
-<video
-    src="{{ .Load.VideoURL }}"
-    width="300"
-    autoplay
-    muted
-    loop
-    controls>
-</video>
+        <div class="feed-like">
 
-<p>
-    <a href="/vehicle-auxiliary-loads/feed?id={{ .Load.ID }}&next=true">
-        Next →
-    </a>
-</p>
+            <span class="feed-heart">♡</span>
 
-<hr>
+            <span>
+                {{ .Load.LikeCount }}
+            </span>
 
-<nav>
-    <a href="/vehicle-auxiliary-loads/feed">Feed</a>
-    |
-    <a href="/vehicle-auxiliary-loads/draft">Add</a>
-    |
-    <a href="/vehicle-auxiliary-loads">Grid</a>
-</nav>
+        </div>
+
+        <section class="feed-content">
+
+            <span class="category-badge">
+                {{ .Load.Category }}
+            </span>
+
+            <h1 class="feed-title">
+                {{ .Load.Name }}
+            </h1>
+
+
+            <div class="feed-description">
+
+                <input
+                    class="description-toggle"
+                    id="description-toggle"
+                    type="checkbox"
+                >
+
+                <p class="description-text">
+                    {{ .Load.Description }}
+                </p>
+
+                <label
+                    class="description-toggle-label"
+                    for="description-toggle">
+                </label>
+
+            </div>
+
+            <div class="metric-label">
+                Auxiliary Power Draw
+            </div>
+
+            <p class="metric-value">
+                {{ .Load.PowerDrawW }} W
+            </p>
+
+        </section>
+
+        {{ if .Load.HasNext }}
+
+        <a
+            class="next-link"
+            href="/vehicle-auxiliary-loads/feed?id={{ .Load.ID }}&next=true">
+
+            Next
+
+            <span class="next-arrow">
+                →
+            </span>
+
+        </a>
+
+        {{ end }}
+
+    </main>
+
+    <nav class="bottom-nav">
+
+        <a
+            class="nav-item active"
+            href="/vehicle-auxiliary-loads/feed">
+
+            <span class="nav-icon">▦</span>
+
+            Feed
+
+        </a>
+
+        <a
+            class="nav-item"
+            href="/vehicle-auxiliary-loads/draft">
+
+            <span class="nav-icon">⊕</span>
+
+            Add
+
+        </a>
+
+        <a
+            class="nav-item"
+            href="/vehicle-auxiliary-loads">
+
+            <span class="nav-icon">▦</span>
+
+            Grid
+
+        </a>
+
+    </nav>
+
+</div>
 
 </body>
 </html>

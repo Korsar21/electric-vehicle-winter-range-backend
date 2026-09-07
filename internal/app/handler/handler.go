@@ -29,8 +29,14 @@ type VehicleAuxiliaryLoadView struct {
 	PowerDrawW  int
 	Status      repository.AuxiliaryLoadStatus
 	LikeCount   int
-	ImageURL    string
-	VideoURL    string
+
+	ImageKey string
+	VideoKey string
+
+	ImageURL string
+	VideoURL string
+
+	HasNext bool
 }
 
 func NewHandler(r *repository.Repository) *Handler {
@@ -60,6 +66,9 @@ func makeVehicleAuxiliaryLoadView(
 		Status:      load.Status,
 
 		LikeCount: len(load.LikeUserIDs),
+
+		ImageKey: load.ImageKey,
+		VideoKey: load.VideoKey,
 
 		ImageURL: makeMediaURL(load.ImageKey),
 		VideoURL: makeMediaURL(load.VideoKey),
@@ -105,6 +114,7 @@ func (h *Handler) GetVehicleAuxiliaryLoadFeed(ctx *gin.Context) {
 	}
 
 	view := makeVehicleAuxiliaryLoadView(load)
+	view.HasNext = h.Repository.HasNextPublishedVehicleAuxiliaryLoad(load.ID)
 
 	ctx.HTML(
 		http.StatusOK,
