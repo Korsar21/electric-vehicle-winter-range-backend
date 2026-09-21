@@ -21,13 +21,14 @@ type Handler struct {
 	Repository *repository.Repository
 }
 
-type VehicleAuxiliaryLoadView struct {
+type ElectricCarLoadView struct {
 	ID          int
 	Name        string
 	Description string
 	Category    string
 	PowerDrawW  int
-	Status      repository.AuxiliaryLoadStatus
+	Priority    string
+	Status      repository.ElectricCarLoadStatus
 	LikeCount   int
 
 	ImageKey string
@@ -54,15 +55,16 @@ func makeMediaURL(key string) string {
 	)
 }
 
-func makeVehicleAuxiliaryLoadView(
-	load repository.VehicleAuxiliaryLoad,
-) VehicleAuxiliaryLoadView {
-	return VehicleAuxiliaryLoadView{
+func makeElectricCarLoadView(
+	load repository.ElectricCarLoad,
+) ElectricCarLoadView {
+	return ElectricCarLoadView{
 		ID:          load.ID,
 		Name:        load.Name,
 		Description: load.Description,
 		Category:    load.Category,
 		PowerDrawW:  load.PowerDrawW,
+		Priority:    load.Priority,
 		Status:      load.Status,
 
 		LikeCount: len(load.LikeUserIDs),
@@ -75,31 +77,31 @@ func makeVehicleAuxiliaryLoadView(
 	}
 }
 
-func (h *Handler) GetVehicleAuxiliaryLoadFeed(ctx *gin.Context) {
+func (h *Handler) GetElectricCarLoadFeed(ctx *gin.Context) {
 	idQuery := ctx.Query("id")
 	nextQuery := ctx.Query("next")
 
 	var (
-		load repository.VehicleAuxiliaryLoad
+		load repository.ElectricCarLoad
 		err  error
 	)
 
 	if idQuery == "" {
-		load, err = h.Repository.GetFirstPublishedVehicleAuxiliaryLoad()
+		load, err = h.Repository.GetFirstPublishedElectricCarLoad()
 	} else {
 		id, parseErr := strconv.Atoi(idQuery)
 		if parseErr != nil {
 			ctx.String(
 				http.StatusBadRequest,
-				"invalid vehicle auxiliary load id",
+				"invalid electric car load id",
 			)
 			return
 		}
 
 		if nextQuery == "true" {
-			load, err = h.Repository.GetNextPublishedVehicleAuxiliaryLoad(id)
+			load, err = h.Repository.GetNextPublishedElectricCarLoad(id)
 		} else {
-			load, err = h.Repository.GetPublishedVehicleAuxiliaryLoadByID(id)
+			load, err = h.Repository.GetPublishedElectricCarLoadByID(id)
 		}
 	}
 
@@ -113,20 +115,20 @@ func (h *Handler) GetVehicleAuxiliaryLoadFeed(ctx *gin.Context) {
 		return
 	}
 
-	view := makeVehicleAuxiliaryLoadView(load)
-	view.HasNext = h.Repository.HasNextPublishedVehicleAuxiliaryLoad(load.ID)
+	view := makeElectricCarLoadView(load)
+	view.HasNext = true
 
 	ctx.HTML(
 		http.StatusOK,
-		"feed.html",
+		"electric_car_loads_feed.html",
 		gin.H{
 			"Load": view,
 		},
 	)
 }
 
-func (h *Handler) GetDraftVehicleAuxiliaryLoad(ctx *gin.Context) {
-	load, err := h.Repository.GetDraftVehicleAuxiliaryLoad()
+func (h *Handler) GetDraftElectricCarLoad(ctx *gin.Context) {
+	load, err := h.Repository.GetDraftElectricCarLoad()
 	if err != nil {
 		logrus.Error(err)
 
@@ -137,18 +139,18 @@ func (h *Handler) GetDraftVehicleAuxiliaryLoad(ctx *gin.Context) {
 		return
 	}
 
-	view := makeVehicleAuxiliaryLoadView(load)
+	view := makeElectricCarLoadView(load)
 
 	ctx.HTML(
 		http.StatusOK,
-		"add.html",
+		"electric_car_loads_add.html",
 		gin.H{
 			"Load": view,
 		},
 	)
 }
 
-func (h *Handler) GetVehicleAuxiliaryLoadGrid(ctx *gin.Context) {
+func (h *Handler) GetElectricCarLoadGrid(ctx *gin.Context) {
 	maxPowerW := defaultMaxPowerW
 
 	maxPowerQuery := ctx.Query("maxPowerW")
@@ -174,29 +176,29 @@ func (h *Handler) GetVehicleAuxiliaryLoadGrid(ctx *gin.Context) {
 		maxPowerW = value
 	}
 
-	loads, err := h.Repository.GetPublishedVehicleAuxiliaryLoads(maxPowerW)
+	loads, err := h.Repository.GetPublishedElectricCarLoads(maxPowerW)
 	if err != nil {
 		logrus.Error(err)
 
 		ctx.String(
 			http.StatusInternalServerError,
-			"failed to load vehicle auxiliary loads",
+			"failed to load electric car loads",
 		)
 		return
 	}
 
-	views := make([]VehicleAuxiliaryLoadView, 0, len(loads))
+	views := make([]ElectricCarLoadView, 0, len(loads))
 
 	for _, load := range loads {
 		views = append(
 			views,
-			makeVehicleAuxiliaryLoadView(load),
+			makeElectricCarLoadView(load),
 		)
 	}
 
 	ctx.HTML(
 		http.StatusOK,
-		"grid.html",
+		"electric_car_loads_grid.html",
 		gin.H{
 			"Loads":     views,
 			"MaxPowerW": maxPowerW,

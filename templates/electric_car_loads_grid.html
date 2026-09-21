@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
 
@@ -8,7 +8,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Winter Auxiliary Loads</title>
+    <title>Электрические нагрузки автомобиля</title>
 
     <link
         rel="stylesheet"
@@ -25,7 +25,7 @@
         <header class="page-header">
 
             <h1 class="page-title">
-                Winter Auxiliary Loads
+                Электрические нагрузки автомобиля
             </h1>
 
         </header>
@@ -33,16 +33,16 @@
         <form
             class="grid-filter"
             method="GET"
-            action="/vehicle-auxiliary-loads">
+            action="/electric-car-loads">
 
             <div class="filter-row">
 
                 <span>
-                    Max Power Limit
+                    Максимальная мощность
                 </span>
 
                 <span class="filter-value">
-                    {{ .MaxPowerW }} W
+                    {{ .MaxPowerW }} Вт
                 </span>
 
             </div>
@@ -61,11 +61,11 @@
             <div class="range-labels">
 
                 <span>
-                    0 W
+                    0 Вт
                 </span>
 
                 <span>
-                    5000 W
+                    5000 Вт
                 </span>
 
             </div>
@@ -74,7 +74,7 @@
                 class="filter-button"
                 type="submit">
 
-                Apply Filter
+                Применить фильтр
 
             </button>
 
@@ -91,7 +91,7 @@
 
                 <a
                     class="load-card-link"
-                    href="/vehicle-auxiliary-loads/feed?id={{ .ID }}">
+                    href="/electric-car-loads/feed?id={{ .ID }}">
 
                     <img
                         class="load-card-image"
@@ -109,6 +109,10 @@
 
                             <span class="load-power">
                                 {{ .PowerDrawW }} W
+                            </span>
+
+                            <span class="load-priority">
+                                {{ .Priority }}
                             </span>
 
                             <span class="load-likes">
@@ -133,31 +137,31 @@
 
         <a
             class="nav-item"
-            href="/vehicle-auxiliary-loads/feed">
+            href="/electric-car-loads/feed">
 
             <span class="nav-icon">▦</span>
 
-            Feed
+            Лента
 
         </a>
 
         <a
             class="nav-item"
-            href="/vehicle-auxiliary-loads/draft">
+            href="/electric-car-loads/add">
 
             <span class="nav-icon">⊕</span>
 
-            Add
+            Добавление
 
         </a>
 
         <a
             class="nav-item active"
-            href="/vehicle-auxiliary-loads">
+            href="/electric-car-loads">
 
             <span class="nav-icon">▦</span>
 
-            Grid
+            Плитка
 
         </a>
 

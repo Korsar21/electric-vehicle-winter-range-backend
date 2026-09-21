@@ -2,28 +2,29 @@ package repository
 
 import "fmt"
 
-type AuxiliaryLoadStatus string
+type ElectricCarLoadStatus string
 
 const (
-	StatusDraft     AuxiliaryLoadStatus = "draft"
-	StatusPublished AuxiliaryLoadStatus = "published"
-	StatusDeleted   AuxiliaryLoadStatus = "deleted"
+	StatusDraft     ElectricCarLoadStatus = "draft"
+	StatusPublished ElectricCarLoadStatus = "published"
+	StatusDeleted   ElectricCarLoadStatus = "deleted"
 )
 
-type VehicleAuxiliaryLoad struct {
+type ElectricCarLoad struct {
 	ID          int
 	Name        string
 	Description string
 	Category    string
 	PowerDrawW  int
-	Status      AuxiliaryLoadStatus
+	Priority    string
+	Status      ElectricCarLoadStatus
 	LikeUserIDs []int
 	ImageKey    string
 	VideoKey    string
 }
 
 type Repository struct {
-	vehicleAuxiliaryLoads []VehicleAuxiliaryLoad
+	electricCarLoads []ElectricCarLoad
 }
 
 func generateLikeUserIDs(startID, count int) []int {
@@ -37,12 +38,13 @@ func generateLikeUserIDs(startID, count int) []int {
 }
 
 func NewRepository() (*Repository, error) {
-	loads := []VehicleAuxiliaryLoad{
+	loads := []ElectricCarLoad{
 		{
 			ID:          1,
-			Name:        "Cabin Heater",
-			Description: "High-power cabin heating system used to maintain passenger comfort in sub-zero temperatures. In severe winter conditions it can become one of the largest auxiliary electrical loads and noticeably reduce the available driving range.", Category: "Heating",
+			Name:        "Обогреватель салона",
+			Description: "Мощная система отопления салона поддерживает комфорт пассажиров при отрицательных температурах. В суровых зимних условиях она может стать одной из крупнейших дополнительных электрических нагрузок и заметно снизить доступный запас хода.", Category: "Отопление",
 			PowerDrawW:  4500,
+			Priority:    "Высокий",
 			Status:      StatusPublished,
 			LikeUserIDs: generateLikeUserIDs(1000, 128),
 			ImageKey:    "cabin-heater.jpg",
@@ -50,9 +52,10 @@ func NewRepository() (*Repository, error) {
 		},
 		{
 			ID:          2,
-			Name:        "Front Seat Heater",
-			Description: "Localized electric heating built into the front seat cushion and backrest. It provides direct passenger comfort while consuming substantially less electrical power than heating the entire vehicle cabin.", Category: "Heating",
+			Name:        "Обогреватель переднего сиденья",
+			Description: "Локальный электрический обогрев встроен в подушку и спинку переднего сиденья. Он обеспечивает непосредственный комфорт пассажира и потребляет значительно меньше энергии, чем отопление всего салона.", Category: "Отопление",
 			PowerDrawW:  150,
+			Priority:    "Низкий",
 			Status:      StatusPublished,
 			LikeUserIDs: generateLikeUserIDs(2000, 84),
 			ImageKey:    "front-seat-heater.jpg",
@@ -60,9 +63,10 @@ func NewRepository() (*Repository, error) {
 		},
 		{
 			ID:          4,
-			Name:        "Steering Wheel Heater",
-			Description: "Localized electric heating around the steering wheel rim improves driver comfort in cold weather. Its relatively low power demand makes it more energy-efficient than increasing whole-cabin temperature.", Category: "Heating",
+			Name:        "Обогреватель рулевого колеса",
+			Description: "Локальный электрический обогрев обода рулевого колеса повышает комфорт водителя в холодную погоду. Низкое энергопотребление делает его более экономичным, чем повышение температуры во всём салоне.", Category: "Отопление",
 			PowerDrawW:  50,
+			Priority:    "Низкий",
 			Status:      StatusPublished,
 			LikeUserIDs: generateLikeUserIDs(3000, 61),
 			ImageKey:    "steering-wheel-heater.jpg",
@@ -70,9 +74,10 @@ func NewRepository() (*Repository, error) {
 		},
 		{
 			ID:          7,
-			Name:        "Windshield Defroster",
-			Description: "Electrical windshield heating removes frost and ice and helps maintain forward visibility during winter operation. The system increases auxiliary electrical consumption while it is active.", Category: "Visibility",
+			Name:        "Обогреватель лобового стекла",
+			Description: "Электрический обогрев лобового стекла удаляет иней и лёд и помогает сохранять обзорность при эксплуатации автомобиля зимой. Во время работы система увеличивает дополнительное потребление электроэнергии.", Category: "Обзорность",
 			PowerDrawW:  540,
+			Priority:    "Высокий",
 			Status:      StatusPublished,
 			LikeUserIDs: generateLikeUserIDs(4000, 97),
 			ImageKey:    "windshield-defroster.jpg",
@@ -80,9 +85,10 @@ func NewRepository() (*Repository, error) {
 		},
 		{
 			ID:          9,
-			Name:        "Battery Heater",
-			Description: "Battery thermal-management heater warms the traction battery at low ambient temperatures. Maintaining a suitable battery temperature supports charging and power performance but consumes additional stored energy.", Category: "Battery Thermal Management",
+			Name:        "Обогреватель батареи",
+			Description: "Нагреватель системы терморегулирования прогревает тяговую батарею при низкой температуре окружающей среды. Поддержание подходящей температуры батареи улучшает возможности зарядки и отдачу мощности, но потребляет дополнительную энергию.", Category: "Терморегулирование батареи",
 			PowerDrawW:  1000,
+			Priority:    "Высокий",
 			Status:      StatusPublished,
 			LikeUserIDs: generateLikeUserIDs(5000, 73),
 			ImageKey:    "battery-heater.jpg",
@@ -90,10 +96,11 @@ func NewRepository() (*Repository, error) {
 		},
 		{
 			ID:          12,
-			Name:        "Rear Seat Heater",
-			Description: "Rear seat heating system intended to provide localized passenger comfort in cold weather.",
-			Category:    "Heating",
+			Name:        "Обогреватель заднего сиденья",
+			Description: "Система обогрева заднего сиденья предназначена для локального повышения комфорта пассажиров в холодную погоду.",
+			Category:    "Отопление",
 			PowerDrawW:  150,
+			Priority:    "Низкий",
 			Status:      StatusDraft,
 			LikeUserIDs: []int{},
 			ImageKey:    "rear-seat-heater.jpg",
@@ -101,10 +108,11 @@ func NewRepository() (*Repository, error) {
 		},
 		{
 			ID:          15,
-			Name:        "Rear Window Defroster",
+			Name:        "Обогреватель заднего стекла",
 			Description: "Electrical rear-window heating used to remove frost and condensation.",
-			Category:    "Visibility",
+			Category:    "Обзорность",
 			PowerDrawW:  240,
+			Priority:    "Высокий",
 			Status:      StatusDeleted,
 			LikeUserIDs: generateLikeUserIDs(6000, 34),
 			ImageKey:    "rear-window-defroster.jpg",
@@ -113,18 +121,18 @@ func NewRepository() (*Repository, error) {
 	}
 
 	if len(loads) == 0 {
-		return nil, fmt.Errorf("vehicle auxiliary load collection is empty")
+		return nil, fmt.Errorf("electric car load collection is empty")
 	}
 
 	return &Repository{
-		vehicleAuxiliaryLoads: loads,
+		electricCarLoads: loads,
 	}, nil
 }
 
-func (r *Repository) GetPublishedVehicleAuxiliaryLoads(maxPowerW int) ([]VehicleAuxiliaryLoad, error) {
-	result := make([]VehicleAuxiliaryLoad, 0)
+func (r *Repository) GetPublishedElectricCarLoads(maxPowerW int) ([]ElectricCarLoad, error) {
+	result := make([]ElectricCarLoad, 0)
 
-	for _, load := range r.vehicleAuxiliaryLoads {
+	for _, load := range r.electricCarLoads {
 		if load.Status != StatusPublished {
 			continue
 		}
@@ -139,35 +147,35 @@ func (r *Repository) GetPublishedVehicleAuxiliaryLoads(maxPowerW int) ([]Vehicle
 	return result, nil
 }
 
-func (r *Repository) GetPublishedVehicleAuxiliaryLoadByID(id int) (VehicleAuxiliaryLoad, error) {
-	for _, load := range r.vehicleAuxiliaryLoads {
+func (r *Repository) GetPublishedElectricCarLoadByID(id int) (ElectricCarLoad, error) {
+	for _, load := range r.electricCarLoads {
 		if load.ID == id && load.Status == StatusPublished {
 			return load, nil
 		}
 	}
 
-	return VehicleAuxiliaryLoad{}, fmt.Errorf(
-		"published vehicle auxiliary load with id %d not found",
+	return ElectricCarLoad{}, fmt.Errorf(
+		"published electric car load with id %d not found",
 		id,
 	)
 }
 
-func (r *Repository) GetDraftVehicleAuxiliaryLoad() (VehicleAuxiliaryLoad, error) {
-	for _, load := range r.vehicleAuxiliaryLoads {
+func (r *Repository) GetDraftElectricCarLoad() (ElectricCarLoad, error) {
+	for _, load := range r.electricCarLoads {
 		if load.Status == StatusDraft {
 			return load, nil
 		}
 	}
 
-	return VehicleAuxiliaryLoad{}, fmt.Errorf(
-		"draft vehicle auxiliary load not found",
+	return ElectricCarLoad{}, fmt.Errorf(
+		"draft electric car load not found",
 	)
 }
 
-func (r *Repository) GetNextPublishedVehicleAuxiliaryLoad(id int) (VehicleAuxiliaryLoad, error) {
+func (r *Repository) GetNextPublishedElectricCarLoad(id int) (ElectricCarLoad, error) {
 	currentFound := false
 
-	for _, load := range r.vehicleAuxiliaryLoads {
+	for _, load := range r.electricCarLoads {
 		if load.Status != StatusPublished {
 			continue
 		}
@@ -182,44 +190,31 @@ func (r *Repository) GetNextPublishedVehicleAuxiliaryLoad(id int) (VehicleAuxili
 	}
 
 	if !currentFound {
-		return VehicleAuxiliaryLoad{}, fmt.Errorf(
+		return ElectricCarLoad{}, fmt.Errorf(
 			"published vehicle auxiliary load with id %d not found",
 			id,
 		)
 	}
 
-	return VehicleAuxiliaryLoad{}, fmt.Errorf(
-		"there is no next published vehicle auxiliary load after id %d",
-		id,
-	)
+	return r.GetFirstPublishedElectricCarLoad()
 }
 
-func (r *Repository) GetFirstPublishedVehicleAuxiliaryLoad() (VehicleAuxiliaryLoad, error) {
-	for _, load := range r.vehicleAuxiliaryLoads {
+func (r *Repository) GetFirstPublishedElectricCarLoad() (ElectricCarLoad, error) {
+	for _, load := range r.electricCarLoads {
 		if load.Status == StatusPublished {
 			return load, nil
 		}
 	}
 
-	return VehicleAuxiliaryLoad{}, fmt.Errorf(
+	return ElectricCarLoad{}, fmt.Errorf(
 		"published vehicle auxiliary load not found",
 	)
 }
 
-func (r *Repository) HasNextPublishedVehicleAuxiliaryLoad(id int) bool {
-	currentFound := false
-
-	for _, load := range r.vehicleAuxiliaryLoads {
-		if load.Status != StatusPublished {
-			continue
-		}
-
-		if currentFound {
+func (r *Repository) HasNextPublishedElectricCarLoad(id int) bool {
+	for _, load := range r.electricCarLoads {
+		if load.ID == id && load.Status == StatusPublished {
 			return true
-		}
-
-		if load.ID == id {
-			currentFound = true
 		}
 	}
 

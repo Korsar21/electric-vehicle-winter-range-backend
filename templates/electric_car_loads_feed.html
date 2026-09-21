@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
 
@@ -60,7 +60,6 @@
                 {{ .Load.Name }}
             </h1>
 
-
             <div class="feed-description">
 
                 <input
@@ -80,23 +79,41 @@
 
             </div>
 
-            <div class="metric-label">
-                Auxiliary Power Draw
-            </div>
+            <div class="feed-metrics">
 
-            <p class="metric-value">
-                {{ .Load.PowerDrawW }} W
-            </p>
+                <div class="feed-metric">
+
+                    <div class="metric-label">
+                        Потребляемая мощность
+                    </div>
+
+                    <p class="metric-value">
+                        {{ .Load.PowerDrawW }} Вт
+                    </p>
+
+                </div>
+
+                <div class="feed-metric">
+
+                    <div class="metric-label">
+                        Приоритет
+                    </div>
+
+                    <p class="metric-priority">
+                        {{ .Load.Priority }}
+                    </p>
+
+                </div>
+
+            </div>
 
         </section>
 
-        {{ if .Load.HasNext }}
-
         <a
             class="next-link"
-            href="/vehicle-auxiliary-loads/feed?id={{ .Load.ID }}&next=true">
+            href="/electric-car-loads/feed?id={{ .Load.ID }}&next=true">
 
-            Next
+            Далее
 
             <span class="next-arrow">
                 →
@@ -104,39 +121,37 @@
 
         </a>
 
-        {{ end }}
-
     </main>
 
     <nav class="bottom-nav">
 
         <a
             class="nav-item active"
-            href="/vehicle-auxiliary-loads/feed">
+            href="/electric-car-loads/feed">
 
             <span class="nav-icon">▦</span>
 
-            Feed
+            Лента
 
         </a>
 
         <a
             class="nav-item"
-            href="/vehicle-auxiliary-loads/draft">
+            href="/electric-car-loads/add">
 
             <span class="nav-icon">⊕</span>
 
-            Add
+            Добавление
 
         </a>
 
         <a
             class="nav-item"
-            href="/vehicle-auxiliary-loads">
+            href="/electric-car-loads">
 
             <span class="nav-icon">▦</span>
 
-            Grid
+            Плитка
 
         </a>
 

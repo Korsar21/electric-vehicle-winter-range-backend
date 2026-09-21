@@ -50,17 +50,16 @@ body {
     justify-content: center;
     align-items: flex-start;
 
-    background: #151922;
+    background: var(--white);
 
     font-family: "Poppins", "Segoe UI", Arial, sans-serif;
     color: var(--recurrent-dark-blue);
 }
 
-/*
-    Fixed mobile viewport.
-    IMPORTANT:
-    no responsive/adaptive layout is used.
-*/
+/* -------------------------
+   APP CONTAINER
+------------------------- */
+
 .app-shell {
     position: relative;
 
@@ -74,7 +73,7 @@ body {
 
     overflow: hidden;
 
-    background: var(--ghost-blue);
+    background: var(--white);
 
     box-shadow:
         0 0 0 1px rgba(255, 255, 255, 0.04),
@@ -200,11 +199,14 @@ body {
     z-index: 3;
 }
 
+/* Лайки подняты выше, чтобы не пересекаться
+   с описанием карточки */
+
 .feed-like {
     position: absolute;
 
     right: 20px;
-    bottom: 236px;
+    bottom: 336px;
 
     display: flex;
     align-items: center;
@@ -229,13 +231,14 @@ body {
     right: 24px;
     bottom: 88px;
 
-    height: 240px;
+    height: 258px;
 
     color: var(--white);
 
     z-index: 3;
-}
 
+    position: absolute;
+}
 .category-badge {
     display: inline-flex;
 
@@ -267,6 +270,9 @@ body {
 }
 
 .feed-description {
+    position: relative;
+    z-index: 1;
+
     margin: 0 0 16px;
 
     max-width: 342px;
@@ -279,12 +285,17 @@ body {
 
 .description-toggle {
     position: absolute;
+
     width: 0;
     height: 0;
+
     margin: 0;
     padding: 0;
+
     opacity: 0;
+
     appearance: none;
+
     pointer-events: none;
 }
 
@@ -318,14 +329,13 @@ body {
 }
 
 .description-toggle-label::after {
-    content: "More";
+    content: "Ещё";
 }
 
 .description-toggle:checked
 ~ .description-toggle-label::after {
-    content: "Less";
+    content: "Скрыть";
 }
-
 
 .metric-label {
     margin-bottom: 2px;
@@ -350,53 +360,57 @@ body {
     font-weight: 800;
 }
 
+/* -------------------------
+   NEXT BUTTON
+------------------------- */
+
 .next-link {
     position: absolute;
 
-    right: 18px;
-    bottom: 20px;
+    right: 16px;
+    bottom: 14px;
 
-    display: inline-flex;
+    width: 74px;
+    height: 38px;
+
+    display: flex;
     align-items: center;
+    justify-content: center;
 
-    gap: 8px;
+    z-index: 10;
 
-    padding: 10px 14px;
+    padding: 0;
 
+    background: rgba(255, 255, 255, 0.12);
     border: 1px solid rgba(255, 255, 255, 0.35);
 
     border-radius: 10px;
 
-    background: rgba(30, 31, 84, 0.55);
-
-    color: var(--white);
-
+    color: white;
     text-decoration: none;
 
-    font-size: 12px;
+    backdrop-filter: blur(8px);
 
-    backdrop-filter: blur(6px);
+    font-size: 13px;
+    font-weight: 600;
 
-    transition:
-        transform 0.2s ease,
-        background-color 0.2s ease,
-        box-shadow 0.2s ease;
-}
+    transition: 0.2s ease;
 
-.next-arrow {
-    transition: transform 0.2s ease;
+    cursor: pointer;
+    user-select: none;
 }
 
 .next-link:hover {
-    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.22);
+}
 
-    background: rgba(95, 73, 243, 0.8);
-
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+.next-arrow {
+    margin-left: 6px;
+    transition: transform 0.2s ease;
 }
 
 .next-link:hover .next-arrow {
-    transform: translateX(4px);
+    transform: translateX(3px);
 }
 
 /* -------------------------
@@ -412,21 +426,15 @@ body {
 
     padding-bottom: 22px;
 
-    background: var(--ghost-blue);
+    background: var(--white);
 }
 
 .page-header {
-    padding: 20px 18px 14px;
+    padding: 18px 18px 14px;
 
     background: var(--white);
 
     border-bottom: 1px solid var(--border);
-}
-
-.page-header-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
 }
 
 .page-title {
@@ -438,65 +446,110 @@ body {
     color: var(--recurrent-dark-blue);
 }
 
-.status-badge {
-    display: inline-flex;
-
-    padding: 5px 9px;
-
-    border-radius: 6px;
-
-    background: #fff0bd;
-
-    color: #be7900;
-
-    font-size: 10px;
-    font-weight: 700;
-
-    text-transform: uppercase;
-}
-
-.media-field label {
-    color: var(--recurrent-blue);
-
-    font-size: 11px;
-    font-weight: 700;
-}
-
-.media-field:nth-child(2) label {
-    color: var(--recurrent-purple);
-}
-
-.media-input {
-    width: 100%;
-
-    margin-top: 6px;
-
-    border: 0;
-    outline: none;
-
-    background: transparent;
-
-    color: var(--gray);
-
-    font-size: 9px;
-}
+/* -------------------------
+   ADD PAGE
+------------------------- */
 
 .add-content {
-    padding: 20px;
+    padding: 18px 20px 24px;
 }
 
-.draft-preview {
-    width: 100%;
-    height: 156px;
+/*
+    Фото и видео располагаются сверху.
+    Пользователю показывается непосредственно
+    содержимое медиа, а не технические имена файлов.
+*/
 
-    margin-bottom: 16px;
+.draft-media {
+    display: grid;
 
-    object-fit: cover;
+    grid-template-columns: 1fr 1fr;
+
+    gap: 10px;
+
+    margin-bottom: 18px;
+}
+
+.draft-media-item {
+    position: relative;
+
+    min-width: 0;
+
+    overflow: hidden;
+
+    border: 1px solid var(--border);
 
     border-radius: 12px;
 
-    box-shadow: 0 6px 18px rgba(30, 31, 84, 0.12);
+    background: var(--ghost-blue);
+
+    box-shadow:
+        0 5px 14px rgba(30, 31, 84, 0.10);
 }
+
+.draft-media-item::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: 0;
+    right: 0;
+
+    height: 3px;
+
+    background: var(--recurrent-blue);
+
+    z-index: 2;
+}
+
+.draft-media-item:nth-child(2)::before {
+    background: var(--recurrent-purple);
+}
+
+.draft-media-label {
+    position: absolute;
+
+    left: 9px;
+    top: 8px;
+
+    padding: 4px 7px;
+
+    border-radius: 6px;
+
+    background: rgba(255, 255, 255, 0.90);
+
+    color: var(--recurrent-dark-blue);
+
+    font-size: 10px;
+    line-height: 1;
+
+    font-weight: 700;
+
+    z-index: 3;
+}
+
+.draft-media .draft-preview,
+.draft-video {
+    display: block;
+
+    width: 100%;
+    height: 142px;
+
+    margin: 0;
+
+    object-fit: cover;
+
+    border-radius: 0;
+}
+
+.draft-video {
+    background: var(--black);
+}
+
+/* -------------------------
+   FORM
+------------------------- */
 
 .form-field {
     margin-bottom: 14px;
@@ -547,59 +600,9 @@ textarea.form-control {
 .form-control:focus {
     border-color: var(--recurrent-blue);
 
-    box-shadow: 0 0 0 3px rgba(62, 131, 249, 0.12);
+    box-shadow:
+        0 0 0 3px rgba(62, 131, 249, 0.12);
 }
-
-.media-fields {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-
-    gap: 10px;
-}
-
-.media-field {
-    min-height: 72px;
-
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-
-    padding: 10px;
-
-    border: 1px dashed var(--recurrent-blue);
-    border-radius: 10px;
-
-    background: var(--white);
-
-    overflow: hidden;
-}
-
-.media-field label {
-    color: var(--recurrent-blue);
-
-    font-size: 11px;
-    font-weight: 700;
-}
-
-.media-field:nth-child(2) label {
-    color: var(--recurrent-purple);
-}
-
-.media-input {
-    width: 100%;
-
-    margin-top: 6px;
-
-    border: 0;
-    outline: none;
-
-    background: transparent;
-
-    color: var(--gray);
-
-    font-size: 9px;
-}
-
 
 .saving-note {
     margin: 18px 0 0;
@@ -625,11 +628,13 @@ textarea.form-control {
 
 .filter-row {
     display: flex;
+
     justify-content: space-between;
 
     margin-bottom: 8px;
 
     font-size: 11px;
+
     font-weight: 700;
 }
 
@@ -645,6 +650,7 @@ textarea.form-control {
 
 .range-labels {
     display: flex;
+
     justify-content: space-between;
 
     margin-top: 4px;
@@ -654,18 +660,25 @@ textarea.form-control {
     font-size: 9px;
 }
 
+/*
+    Полупрозрачная кнопка в стиле
+    исходного интерфейса Recurrent.
+*/
+
 .filter-button {
     width: 100%;
 
     margin-top: 9px;
+
     padding: 8px 12px;
 
-    border: 0;
+    border: 1px solid var(--recurrent-blue);
+
     border-radius: 8px;
 
-    background: var(--recurrent-blue);
+    background: rgba(62, 131, 249, 0.08);
 
-    color: var(--white);
+    color: var(--recurrent-blue);
 
     font-weight: 700;
 
@@ -677,10 +690,18 @@ textarea.form-control {
 }
 
 .filter-button:hover {
-    background: var(--recurrent-purple);
+    background: rgba(95, 73, 243, 0.10);
+
+    border-color: var(--recurrent-purple);
+
+    color: var(--recurrent-purple);
 
     transform: translateY(-1px);
 }
+
+/* -------------------------
+   LOAD CARDS
+------------------------- */
 
 .load-grid {
     display: grid;
@@ -703,7 +724,8 @@ textarea.form-control {
 
     background: var(--recurrent-dark-blue);
 
-    box-shadow: 0 5px 14px rgba(30, 31, 84, 0.12);
+    box-shadow:
+        0 5px 14px rgba(30, 31, 84, 0.12);
 
     transition:
         transform 0.2s ease,
@@ -713,11 +735,13 @@ textarea.form-control {
 .load-card:hover {
     transform: translateY(-2px);
 
-    box-shadow: 0 9px 22px rgba(30, 31, 84, 0.22);
+    box-shadow:
+        0 9px 22px rgba(30, 31, 84, 0.22);
 }
 
 .load-card-link {
     color: inherit;
+
     text-decoration: none;
 }
 
@@ -742,15 +766,27 @@ textarea.form-control {
     color: var(--white);
 
     font-size: 14px;
+
     line-height: 17px;
 
     font-weight: 600;
 }
 
+/*
+    Нижняя строка карточки:
+
+    мощность | приоритет | лайки
+*/
+
 .load-card-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        auto
+        auto;
+
+    align-items: end;
 
     gap: 6px;
 }
@@ -759,11 +795,44 @@ textarea.form-control {
     color: var(--recurrent-blue);
 
     font-size: 15px;
+
     font-weight: 800;
+}
+
+.load-priority {
+    display: block;
+
+    min-width: 0;
+
+    color: var(--white);
+
+    font-size: 10px;
+
+    line-height: 14px;
+
+    font-weight: 600;
+
+    white-space: nowrap;
 }
 
 .load-likes {
     color: #b5aaff;
 
     font-size: 10px;
+}
+
+/* -------------------------
+   FEED PRIORITY
+------------------------- */
+
+.metric-priority {
+    margin: 0;
+
+    color: var(--white);
+
+    font-size: 18px;
+
+    line-height: 24px;
+
+    font-weight: 700;
 }

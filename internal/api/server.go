@@ -30,19 +30,18 @@ func StartServer() error {
 	)
 
 	router.GET(
-		"/vehicle-auxiliary-loads/feed",
-		h.GetVehicleAuxiliaryLoadFeed,
+		"/electric-car-loads/feed",
+		h.GetElectricCarLoadFeed,
 	)
 
 	router.GET(
-		"/vehicle-auxiliary-loads/draft",
-		h.GetDraftVehicleAuxiliaryLoad,
+		"/electric-car-loads/add",
+		h.GetDraftElectricCarLoad,
 	)
 
 	router.GET(
-		"/vehicle-auxiliary-loads",
-		h.GetVehicleAuxiliaryLoadGrid,
+		"/electric-car-loads",
+		h.GetElectricCarLoadGrid,
 	)
-
 	return router.Run(":8080")
 }
