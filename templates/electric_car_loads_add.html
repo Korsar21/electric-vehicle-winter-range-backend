@@ -30,29 +30,50 @@
 
         </header>
 
+
         <section class="add-content">
+
 
             <div class="draft-media">
 
+
                 <div class="draft-media-item active">
 
-                    <span class="draft-media-label">
+                    <label class="draft-media-label">
                         Фото
-                    </span>
+
+                        <input
+                            type="file"
+                            accept="image/*"
+                            hidden
+                        >
+
+                    </label>
+
 
                     <img
                         class="draft-preview"
                         src="{{ .Load.ImageURL }}"
-                        alt="{{ .Load.Name }}"
+                        alt="Предварительный просмотр изображения"
                     >
 
                 </div>
 
+
+
                 <div class="draft-media-item">
 
-                    <span class="draft-media-label">
+                    <label class="draft-media-label">
                         Видео
-                    </span>
+
+                        <input
+                            type="file"
+                            accept="video/*"
+                            hidden
+                        >
+
+                    </label>
+
 
                     <video
                         class="draft-video"
@@ -64,9 +85,13 @@
                         controls>
                     </video>
 
+
                 </div>
 
+
             </div>
+
+
 
             <div class="form-field">
 
@@ -74,14 +99,18 @@
                     Название
                 </label>
 
+
                 <input
                     id="name"
                     class="form-control"
                     type="text"
-                    value="{{ .Load.Name }}"
+                    placeholder="Введите название нагрузки"
                 >
 
             </div>
+
+
+
 
             <div class="form-field">
 
@@ -89,91 +118,23 @@
                     Описание
                 </label>
 
+
                 <textarea
                     id="description"
                     class="form-control"
-                >{{ .Load.Description }}</textarea>
+                    placeholder="Введите описание нагрузки"
+                ></textarea>
+
 
             </div>
 
-            <div class="form-field">
-
-                <label for="category">
-                    Категория
-                </label>
-
-                <select
-                    id="category"
-                    class="form-control">
-
-                    <option selected>
-                        {{ .Load.Category }}
-                    </option>
-
-                    <option>
-                        Обзорность
-                    </option>
-
-                    <option>
-                        Терморегулирование батареи
-                    </option>
-
-                </select>
-
-            </div>
-
-            <div class="form-field">
-
-                <label for="power">
-                    Мощность (Вт)
-                </label>
-
-                <input
-                    id="power"
-                    class="form-control"
-                    type="number"
-                    value="{{ .Load.PowerDrawW }}"
-                >
-
-            </div>
-
-            <div class="form-field">
-
-                <label for="priority">
-                    Приоритет
-                </label>
-
-                <select
-                    id="priority"
-                    class="form-control">
-
-                    <option selected>
-                        {{ .Load.Priority }}
-                    </option>
-
-                    <option>
-                        Высокий
-                    </option>
-
-                    <option>
-                        Средний
-                    </option>
-
-                    <option>
-                        Низкий
-                    </option>
-
-                </select>
-
-            </div>
-
-            <p class="saving-note">
-                Сохранение будет доступно позже
-            </p>
 
         </section>
 
+
     </main>
+
+
 
     <nav class="bottom-nav">
 
@@ -187,6 +148,8 @@
 
         </a>
 
+
+
         <a
             class="nav-item active"
             href="/electric-car-loads/add">
@@ -196,6 +159,8 @@
             Добавление
 
         </a>
+
+
 
         <a
             class="nav-item"
@@ -207,9 +172,12 @@
 
         </a>
 
+
     </nav>
 
+
 </div>
+
 
 </body>
 </html>

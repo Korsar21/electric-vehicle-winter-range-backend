@@ -836,3 +836,12 @@ textarea.form-control {
 
     font-weight: 700;
 }
+
+.draft-media-item input[type="file"] {
+    cursor: pointer;
+}
+
+
+.draft-media-label {
+    cursor: pointer;
+}
