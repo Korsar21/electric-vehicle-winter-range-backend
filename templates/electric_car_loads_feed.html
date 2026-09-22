@@ -22,33 +22,57 @@
 
     <main class="feed-page">
 
-        <video
-            class="feed-video"
-            src="{{ .Load.VideoURL }}"
-            poster="{{ .Load.ImageURL }}"
-            autoplay
-            muted
-            loop
-            playsinline>
-        </video>
+        {{ if .Load.VideoURL }}
+
+<video
+    class="feed-video"
+    src="{{ .Load.VideoURL }}"
+    poster="{{ .Load.ImageURL }}"
+    autoplay
+    muted
+    loop
+    playsinline>
+</video>
+
+{{ end }}
 
         <div class="feed-gradient"></div>
 
-        <img
-            class="feed-thumbnail"
-            src="{{ .Load.ImageURL }}"
-            alt="{{ .Load.Name }}"
-        >
+        {{ if .Load.ImageURL }}
 
-        <div class="feed-like">
+<img
+    class="feed-thumbnail"
+    src="{{ .Load.ImageURL }}"
+    alt="{{ .Load.Name }}"
+>
 
-            <span class="feed-heart">♡</span>
+{{ else }}
 
-            <span>
-                {{ .Load.LikeCount }}
-            </span>
+<div class="feed-thumbnail no-image">
+    Нет изображения
+</div>
 
-        </div>
+{{ end }}
+
+        <form
+    method="POST"
+    action="/electric-car-loads/{{ .Load.ID }}/like"
+    class="feed-like">
+
+    <button
+        type="submit"
+        class="feed-heart">
+
+        ♡
+
+    </button>
+
+
+    <span>
+        {{ .Load.LikeCount }}
+    </span>
+
+</form>
 
         <section class="feed-content">
 

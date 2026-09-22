@@ -31,7 +31,12 @@
         </header>
 
 
-        <section class="add-content">
+        <form 
+    class="add-content"
+    method="POST"
+    action="/electric-car-loads/add"
+    enctype="multipart/form-data"
+>
 
 
             <div class="draft-media">
@@ -43,10 +48,11 @@
                         Фото
 
                         <input
-                            type="file"
-                            accept="image/*"
-                            hidden
-                        >
+    type="file"
+    name="image"
+    accept="image/*"
+    hidden
+>
 
                     </label>
 
@@ -67,10 +73,11 @@
                         Видео
 
                         <input
-                            type="file"
-                            accept="video/*"
-                            hidden
-                        >
+    type="file"
+    name="video"
+    accept="video/*"
+    hidden
+>
 
                     </label>
 
@@ -95,19 +102,19 @@
 
             <div class="form-field">
 
-                <label for="name">
-                    Название
-                </label>
+    <label for="name">
+        Название
+    </label>
 
+    <input
+        id="name"
+        name="name"
+        class="form-control"
+        type="text"
+        placeholder="Введите название нагрузки"
+    >
 
-                <input
-                    id="name"
-                    class="form-control"
-                    type="text"
-                    placeholder="Введите название нагрузки"
-                >
-
-            </div>
+</div>
 
 
 
@@ -120,16 +127,82 @@
 
 
                 <textarea
-                    id="description"
-                    class="form-control"
-                    placeholder="Введите описание нагрузки"
-                ></textarea>
+    id="description"
+    name="description"
+    class="form-control"
+    placeholder="Введите описание нагрузки"
+></textarea>
 
 
             </div>
 
+            <div class="form-field">
 
-        </section>
+<label for="category">
+Категория
+</label>
+
+<input
+id="category"
+name="category"
+class="form-control"
+type="text"
+placeholder="Например: Отопление"
+>
+
+</div>
+
+
+
+<div class="form-field">
+
+<label for="power">
+Мощность (Вт)
+</label>
+
+<input
+id="power"
+name="power"
+class="form-control"
+type="number"
+placeholder="Например: 500"
+>
+
+</div>
+
+
+
+<div class="form-field">
+
+<label for="priority">
+Приоритет
+</label>
+
+
+<select
+id="priority"
+name="priority"
+class="form-control"
+>
+
+<option value="Высокий">
+Высокий
+</option>
+
+
+<option value="Низкий">
+Низкий
+</option>
+
+
+</select>
+
+</div>
+
+<button type="submit" class="form-button">
+    Сохранить
+</button>
+</form>
 
 
     </main>

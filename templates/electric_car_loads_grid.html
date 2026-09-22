@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
 
@@ -16,11 +17,14 @@
     >
 </head>
 
+
 <body>
 
 <div class="app-shell">
 
+
     <main class="page-scroll">
+
 
         <header class="page-header">
 
@@ -30,10 +34,13 @@
 
         </header>
 
+
+
         <form
             class="grid-filter"
             method="GET"
             action="/electric-car-loads">
+
 
             <div class="filter-row">
 
@@ -41,11 +48,15 @@
                     Максимальная мощность
                 </span>
 
+
                 <span class="filter-value">
                     {{ .MaxPowerW }} Вт
                 </span>
 
+
             </div>
+
+
 
             <input
                 class="power-range"
@@ -53,10 +64,12 @@
                 name="maxPowerW"
                 type="range"
                 min="0"
-                max="5000"
+                max="10000"
                 step="50"
                 value="{{ .MaxPowerW }}"
             >
+
+
 
             <div class="range-labels">
 
@@ -64,11 +77,15 @@
                     0 Вт
                 </span>
 
+
                 <span>
-                    5000 Вт
+                    10000 Вт
                 </span>
 
+
             </div>
+
+
 
             <button
                 class="filter-button"
@@ -78,96 +95,204 @@
 
             </button>
 
+
         </form>
+
+
+
+
 
         <section class="load-grid">
 
+
             {{ range .Loads }}
 
+
+
             <article
-    class="load-card"
-    data-image-url="{{ .ImageURL }}"
-    data-video-url="{{ .VideoURL }}">
+                class="load-card"
+                data-image-url="{{ .ImageURL }}"
+                data-video-url="{{ .VideoURL }}">
+
+
 
                 <a
                     class="load-card-link"
                     href="/electric-car-loads/feed?id={{ .ID }}">
 
-                    <img
-                        class="load-card-image"
-                        src="{{ .ImageURL }}"
-                        alt="{{ .Name }}"
-                    >
+
+
+                    {{ if .ImageURL }}
+
+<img
+    class="load-card-image"
+    src="{{ .ImageURL }}"
+    alt="{{ .Name }}"
+>
+
+{{ else }}
+
+<div class="load-card-image no-image">
+    Нет изображения
+</div>
+
+{{ end }}
+
+
+
 
                     <div class="load-card-body">
+
 
                         <h2 class="load-card-title">
                             {{ .Name }}
                         </h2>
 
+
+
                         <div class="load-card-meta">
+
 
                             <span class="load-power">
                                 {{ .PowerDrawW }} W
                             </span>
 
+
+
                             <span class="load-priority">
                                 {{ .Priority }}
                             </span>
+
+
 
                             <span class="load-likes">
                                 ♡ {{ .LikeCount }}
                             </span>
 
+
+
                         </div>
+
 
                     </div>
 
+
+
                 </a>
+
+
+
+
+<a
+    class="card-action edit"
+    href="/electric-car-loads/edit/{{ .ID }}">
+    
+    Редактировать
+
+</a>
+                <form
+                    method="POST"
+                    action="/electric-car-loads/{{ .ID }}/delete">
+
+
+                    <button
+    type="submit"
+    class="card-action delete">
+
+    Удалить
+
+</button>
+
+
+                </form>
+
+
+
 
             </article>
 
+
+
             {{ end }}
+
+
 
         </section>
 
+
+
     </main>
 
+
+
+
+
+
     <nav class="bottom-nav">
+
 
         <a
             class="nav-item"
             href="/electric-car-loads/feed">
 
-            <span class="nav-icon">▦</span>
+
+            <span class="nav-icon">
+                ▦
+            </span>
+
 
             Лента
 
+
         </a>
+
+
+
+
 
         <a
             class="nav-item"
             href="/electric-car-loads/add">
 
-            <span class="nav-icon">⊕</span>
+
+            <span class="nav-icon">
+                ⊕
+            </span>
+
 
             Добавление
 
+
         </a>
+
+
+
+
 
         <a
             class="nav-item active"
             href="/electric-car-loads">
 
-            <span class="nav-icon">▦</span>
+
+            <span class="nav-icon">
+                ▦
+            </span>
+
 
             Плитка
 
+
         </a>
+
+
 
     </nav>
 
+
+
 </div>
 
+
 </body>
+
 </html>
