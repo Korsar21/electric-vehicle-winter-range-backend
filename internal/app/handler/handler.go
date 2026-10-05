@@ -1,28 +1,29 @@
 package handler
 
 import (
-	"context"
-	"fmt"
-	"mime/multipart"
+	"errors"
 	"net/http"
 	"strconv"
 
+	"github.com/Korsar21/electric-vehicle-winter-range-backend/internal/app/model"
 	"github.com/Korsar21/electric-vehicle-winter-range-backend/internal/app/repository"
 	"github.com/gin-gonic/gin"
-	"github.com/minio/minio-go/v7"
 	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 )
 
 const (
-	minioBaseURL     = "http://localhost:9000"
-	minioBucketName  = "ev-winter-assets"
 	defaultMaxPowerW = 10000
 	maxAllowedPowerW = 10000
+
+	//  2 авторизация не реализуется,
+	// поэтому используем пользователя,
+	// созданного Seed().
+	defaultUserID uint = 1
 )
 
 type Handler struct {
 	Repository *repository.Repository
-	Minio      *minio.Client
 }
 
 type ElectricCarLoadView struct {
@@ -35,9 +36,6 @@ type ElectricCarLoadView struct {
 	Status      repository.ElectricCarLoadStatus
 	LikeCount   int
 
-	ImageKey string
-	VideoKey string
-
 	ImageURL string
 	VideoURL string
 
@@ -45,89 +43,70 @@ type ElectricCarLoadView struct {
 }
 
 func NewHandler(
-	r *repository.Repository,
-	minioClient *minio.Client,
+	repo *repository.Repository,
 ) *Handler {
 
 	return &Handler{
-		Repository: r,
-		Minio:      minioClient,
+		Repository: repo,
 	}
 }
 
-func makeMediaURL(key string) string {
+// makeMediaURL возвращает URL файла.
+//
+//	2 дефолтные файлы находятся непосредственно
+//
+// на SSR-сервере в resources/media/.
+func makeMediaURL(key string, mediaType string) string {
 
 	if key == "" {
-		key = "default.jpg"
+		if mediaType == "video" {
+			return "/static/media/default.mp4"
+		}
+
+		return "/static/media/default.jpg"
 	}
 
-	return fmt.Sprintf(
-		"%s/%s/%s",
-		minioBaseURL,
-		minioBucketName,
-		key,
-	)
-}
-
-func (h *Handler) uploadFile(
-	fileHeader *multipart.FileHeader,
-) error {
-
-	file, err := fileHeader.Open()
-
-	if err != nil {
-		return err
-	}
-
-	defer file.Close()
-
-	_, err = h.Minio.PutObject(
-		context.Background(),
-		minioBucketName,
-		fileHeader.Filename,
-		file,
-		fileHeader.Size,
-		minio.PutObjectOptions{},
-	)
-
-	return err
+	return "http://localhost:9000/ev-winter-assets/" + key
 }
 
 func makeElectricCarLoadView(
-	load repository.ElectricCarLoad,
+	load model.ElectricCarLoad,
 ) ElectricCarLoadView {
+
 	return ElectricCarLoadView{
-		ID:          load.ID,
+		ID:          int(load.ID),
 		Name:        load.Name,
 		Description: load.Description,
 		Category:    load.Category,
 		PowerDrawW:  load.PowerDrawW,
 		Priority:    load.Priority,
-		Status:      load.Status,
+		Status:      repository.ElectricCarLoadStatus(load.Status),
+		LikeCount:   load.LikeCount,
 
-		LikeCount: load.LikeCount,
-
-		ImageKey: load.ImageKey,
-		VideoKey: load.VideoKey,
-
-		ImageURL: makeMediaURL(load.ImageKey),
-		VideoURL: makeMediaURL(load.VideoKey),
+		ImageURL: makeMediaURL(load.ImageKey, "image"),
+		VideoURL: makeMediaURL(load.VideoKey, "video"),
 	}
 }
 
+// GET /electric-car-loads/feed
 func (h *Handler) GetElectricCarLoadFeed(ctx *gin.Context) {
+
 	idQuery := ctx.Query("id")
 	nextQuery := ctx.Query("next")
 
 	var (
-		load repository.ElectricCarLoad
+		load model.ElectricCarLoad
 		err  error
 	)
 
 	if idQuery == "" {
+
 		load, err = h.Repository.GetFirstPublishedElectricCarLoad()
+
 	} else {
+
 		id, parseErr := strconv.Atoi(idQuery)
+
 		if parseErr != nil {
 			ctx.String(
 				http.StatusBadRequest,
@@ -137,19 +116,26 @@ func (h *Handler) GetElectricCarLoadFeed(ctx *gin.Context) {
 		}
 
 		if nextQuery == "true" {
-			load, err = h.Repository.GetNextPublishedElectricCarLoad(id)
+
+			load, err =
+				h.Repository.GetNextPublishedElectricCarLoad(id)
+
 		} else {
-			load, err = h.Repository.GetPublishedElectricCarLoadByID(id)
+
+			load, err =
+				h.Repository.GetPublishedElectricCarLoadByID(id)
 		}
 	}
 
 	if err != nil {
+
 		logrus.Error(err)
 
 		ctx.String(
 			http.StatusNotFound,
-			err.Error(),
+			"electric car load not found",
 		)
+
 		return
 	}
 
@@ -165,15 +151,41 @@ func (h *Handler) GetElectricCarLoadFeed(ctx *gin.Context) {
 	)
 }
 
+// GET /electric-car-loads/add
 func (h *Handler) GetDraftElectricCarLoad(ctx *gin.Context) {
-	load, err := h.Repository.GetDraftElectricCarLoad()
+
+	load, err :=
+		h.Repository.GetDraftElectricCarLoad(defaultUserID)
+
+	// сли черновика нет — это нормальная ситуация.
+	// Страница просто открывается пустой.
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+
+		ctx.HTML(
+			http.StatusOK,
+			"electric_car_loads_add.html",
+			gin.H{
+				"Load": ElectricCarLoadView{
+					Status:   repository.StatusDraft,
+					ImageURL: "/static/media/default.jpg",
+					VideoURL: "/static/media/default.mp4",
+				},
+				"HasDraft": false,
+			},
+		)
+
+		return
+	}
+
 	if err != nil {
+
 		logrus.Error(err)
 
 		ctx.String(
-			http.StatusNotFound,
-			err.Error(),
+			http.StatusInternalServerError,
+			"failed to load draft",
 		)
+
 		return
 	}
 
@@ -183,18 +195,23 @@ func (h *Handler) GetDraftElectricCarLoad(ctx *gin.Context) {
 		http.StatusOK,
 		"electric_car_loads_add.html",
 		gin.H{
-			"Load": view,
+			"Load":     view,
+			"HasDraft": true,
 		},
 	)
 }
 
+// GET /electric-car-loads
 func (h *Handler) GetElectricCarLoadGrid(ctx *gin.Context) {
+
 	maxPowerW := defaultMaxPowerW
 
 	maxPowerQuery := ctx.Query("maxPowerW")
 
 	if maxPowerQuery != "" {
+
 		value, err := strconv.Atoi(maxPowerQuery)
+
 		if err != nil {
 			ctx.String(
 				http.StatusBadRequest,
@@ -204,30 +221,38 @@ func (h *Handler) GetElectricCarLoadGrid(ctx *gin.Context) {
 		}
 
 		if value < 0 || value > maxAllowedPowerW {
+
 			ctx.String(
 				http.StatusBadRequest,
-				"maximum power draw must be between 0 and 5000 W",
+				"maximum power draw must be between 0 and 10000 W",
 			)
+
 			return
 		}
 
 		maxPowerW = value
 	}
 
-	loads, err := h.Repository.GetPublishedElectricCarLoads(maxPowerW)
+	loads, err :=
+		h.Repository.GetPublishedElectricCarLoads(maxPowerW)
+
 	if err != nil {
+
 		logrus.Error(err)
 
 		ctx.String(
 			http.StatusInternalServerError,
 			"failed to load electric car loads",
 		)
+
 		return
 	}
 
-	views := make([]ElectricCarLoadView, 0, len(loads))
+	views :=
+		make([]ElectricCarLoadView, 0, len(loads))
 
 	for _, load := range loads {
+
 		views = append(
 			views,
 			makeElectricCarLoadView(load),
@@ -244,83 +269,92 @@ func (h *Handler) GetElectricCarLoadGrid(ctx *gin.Context) {
 	)
 }
 
+// POST /electric-car-loads/add
+//
+// а первом этапе пользователь указывает только название.
+// ото и видео в 2  передаются и  сохраняются.
+// нопка "алее" создаёт черновик.
 func (h *Handler) CreateElectricCarLoad(ctx *gin.Context) {
 
-	imageKey := ""
-	videoKey := ""
+	name := ctx.PostForm("name")
 
-	image, err := ctx.FormFile("image")
+	if name == "" {
 
-	if err == nil {
+		ctx.String(
+			http.StatusBadRequest,
+			"name is required",
+		)
 
-		err = h.uploadFile(image)
-
-		if err != nil {
-
-			ctx.String(
-				http.StatusInternalServerError,
-				err.Error(),
-			)
-
-			return
-		}
-
-		imageKey = image.Filename
+		return
 	}
 
-	video, err := ctx.FormFile("video")
-
-	if err == nil {
-
-		err = h.uploadFile(video)
-
-		if err != nil {
-
-			ctx.String(
-				http.StatusInternalServerError,
-				err.Error(),
-			)
-
-			return
-		}
-
-		videoKey = video.Filename
+	load := model.ElectricCarLoad{
+		Name:      name,
+		Status:    string(repository.StatusDraft),
+		CreatorID: defaultUserID,
 	}
 
-	power, err := strconv.Atoi(
-		ctx.PostForm("power"),
-	)
+	err :=
+		h.Repository.CreateElectricCarLoad(&load)
 
 	if err != nil {
+
+		logrus.Error(err)
+
+		ctx.String(
+			http.StatusInternalServerError,
+			"failed to create draft",
+		)
+
+		return
+	}
+
+	ctx.Redirect(
+		http.StatusFound,
+		"/electric-car-loads/add",
+	)
+}
+
+// POST /electric-car-loads/:id/publish
+//
+// аполняются поля предметной области,
+// после чего черновик переводится в published.
+func (h *Handler) PublishElectricCarLoad(ctx *gin.Context) {
+
+	id, err :=
+		strconv.Atoi(ctx.Param("id"))
+
+	if err != nil {
+
+		ctx.String(
+			http.StatusBadRequest,
+			"invalid id",
+		)
+
+		return
+	}
+
+	power, err :=
+		strconv.Atoi(ctx.PostForm("power"))
+
+	if err != nil {
+
 		ctx.String(
 			http.StatusBadRequest,
 			"invalid power value",
 		)
+
 		return
 	}
 
-	load := repository.ElectricCarLoad{
-
-		Name: ctx.PostForm("name"),
-
-		Description: ctx.PostForm("description"),
-
-		Category: ctx.PostForm("category"),
-
-		PowerDrawW: power,
-
-		Priority: ctx.PostForm("priority"),
-
-		Status: repository.StatusPublished,
-
-		ImageKey: imageKey,
-
-		VideoKey: videoKey,
-
-		LikeCount: 0,
-	}
-
-	err = h.Repository.CreateElectricCarLoad(load)
+	err =
+		h.Repository.PublishElectricCarLoad(
+			id,
+			ctx.PostForm("description"),
+			ctx.PostForm("category"),
+			power,
+			ctx.PostForm("priority"),
+		)
 
 	if err != nil {
 
@@ -328,7 +362,7 @@ func (h *Handler) CreateElectricCarLoad(ctx *gin.Context) {
 
 		ctx.String(
 			http.StatusInternalServerError,
-			err.Error(),
+			"failed to publish electric car load",
 		)
 
 		return
@@ -340,11 +374,13 @@ func (h *Handler) CreateElectricCarLoad(ctx *gin.Context) {
 	)
 }
 
+// POST /electric-car-loads/:id/delete
+//
+// огическое удаление через SQL UPDATE.
 func (h *Handler) DeleteElectricCarLoad(ctx *gin.Context) {
 
-	id, err := strconv.Atoi(
-		ctx.Param("id"),
-	)
+	id, err :=
+		strconv.Atoi(ctx.Param("id"))
 
 	if err != nil {
 
@@ -356,7 +392,8 @@ func (h *Handler) DeleteElectricCarLoad(ctx *gin.Context) {
 		return
 	}
 
-	err = h.Repository.DeleteElectricCarLoad(id)
+	err =
+		h.Repository.DeleteElectricCarLoad(id)
 
 	if err != nil {
 
@@ -364,7 +401,7 @@ func (h *Handler) DeleteElectricCarLoad(ctx *gin.Context) {
 
 		ctx.String(
 			http.StatusInternalServerError,
-			err.Error(),
+			"failed to delete electric car load",
 		)
 
 		return
@@ -373,182 +410,5 @@ func (h *Handler) DeleteElectricCarLoad(ctx *gin.Context) {
 	ctx.Redirect(
 		http.StatusFound,
 		"/electric-car-loads",
-	)
-}
-
-func (h *Handler) GetEditElectricCarLoad(ctx *gin.Context) {
-
-	id, err := strconv.Atoi(ctx.Param("id"))
-
-	if err != nil {
-
-		ctx.String(
-			http.StatusBadRequest,
-			"invalid id",
-		)
-
-		return
-	}
-
-	load, err := h.Repository.GetElectricCarLoadByID(id)
-
-	if err != nil {
-
-		ctx.String(
-			http.StatusNotFound,
-			err.Error(),
-		)
-
-		return
-	}
-
-	view := makeElectricCarLoadView(load)
-
-	ctx.HTML(
-		http.StatusOK,
-		"electric_car_loads_edit.html",
-		gin.H{
-			"Load": view,
-		},
-	)
-
-}
-
-func (h *Handler) UpdateElectricCarLoad(ctx *gin.Context) {
-
-	id, err := strconv.Atoi(ctx.Param("id"))
-
-	if err != nil {
-
-		ctx.String(
-			http.StatusBadRequest,
-			"invalid id",
-		)
-
-		return
-	}
-
-	load, err := h.Repository.GetElectricCarLoadByID(id)
-
-	if err != nil {
-
-		ctx.String(
-			http.StatusNotFound,
-			err.Error(),
-		)
-
-		return
-	}
-
-	load.Name = ctx.PostForm("name")
-
-	load.Description = ctx.PostForm("description")
-
-	load.Category = ctx.PostForm("category")
-
-	load.Priority = ctx.PostForm("priority")
-
-	power, err := strconv.Atoi(
-		ctx.PostForm("power"),
-	)
-
-	if err == nil {
-		load.PowerDrawW = power
-	}
-
-	// обновление изображения
-	image, err := ctx.FormFile("image")
-
-	if err == nil {
-
-		err = h.uploadFile(image)
-
-		if err != nil {
-
-			ctx.String(
-				http.StatusInternalServerError,
-				err.Error(),
-			)
-
-			return
-		}
-
-		load.ImageKey = image.Filename
-	}
-
-	// обновление видео
-	video, err := ctx.FormFile("video")
-
-	if err == nil {
-
-		err = h.uploadFile(video)
-
-		if err != nil {
-
-			ctx.String(
-				http.StatusInternalServerError,
-				err.Error(),
-			)
-
-			return
-		}
-
-		load.VideoKey = video.Filename
-	}
-
-	err = h.Repository.UpdateElectricCarLoad(load)
-
-	if err != nil {
-
-		logrus.Error(err)
-
-		ctx.String(
-			http.StatusInternalServerError,
-			err.Error(),
-		)
-
-		return
-	}
-
-	ctx.Redirect(
-		http.StatusFound,
-		"/electric-car-loads",
-	)
-
-}
-
-func (h *Handler) LikeElectricCarLoad(ctx *gin.Context) {
-
-	id, err := strconv.Atoi(
-		ctx.Param("id"),
-	)
-
-	if err != nil {
-
-		ctx.String(
-			http.StatusBadRequest,
-			"invalid id",
-		)
-
-		return
-	}
-
-	err = h.Repository.LikeElectricCarLoad(id)
-
-	if err != nil {
-
-		logrus.Error(err)
-
-		ctx.String(
-			http.StatusInternalServerError,
-			err.Error(),
-		)
-
-		return
-	}
-
-	ctx.Redirect(
-		http.StatusFound,
-		"/electric-car-loads/feed?id="+strconv.Itoa(id),
 	)
 }

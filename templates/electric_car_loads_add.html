@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -23,24 +23,23 @@
     <main class="page-scroll">
 
         <header class="page-header">
-
             <h1 class="page-title">
                 Добавление нагрузки
             </h1>
-
         </header>
 
 
-        <form 
-    class="add-content"
-    method="POST"
-    action="/electric-car-loads/add"
-    enctype="multipart/form-data"
->
+        {{ if not .HasDraft }}
 
+        <!-- Ы Т: С  -->
+
+        <form
+            class="add-content"
+            method="POST"
+            action="/electric-car-loads/add"
+        >
 
             <div class="draft-media">
-
 
                 <div class="draft-media-item active">
 
@@ -48,23 +47,20 @@
                         Фото
 
                         <input
-    type="file"
-    name="image"
-    accept="image/*"
-    hidden
->
-
+                            type="file"
+                            name="image"
+                            accept="image/*"
+                            hidden
+                        >
                     </label>
-
 
                     <img
                         class="draft-preview"
-                        src="{{ .Load.ImageURL }}"
-                        alt="Предварительный просмотр изображения"
+                        src="/static/media/default.jpg"
+                        alt="Фото по умолчанию"
                     >
 
                 </div>
-
 
 
                 <div class="draft-media-item">
@@ -73,14 +69,88 @@
                         Видео
 
                         <input
-    type="file"
-    name="video"
-    accept="video/*"
-    hidden
->
-
+                            type="file"
+                            name="video"
+                            accept="video/*"
+                            hidden
+                        >
                     </label>
 
+                    <video
+                        class="draft-video"
+                        src="/static/media/default.mp4"
+                        poster="/static/media/default.jpg"
+                        muted
+                        loop
+                        playsinline
+                        controls>
+                    </video>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-field">
+
+                <label for="name">
+                    Название
+                </label>
+
+                <input
+                    id="name"
+                    name="name"
+                    class="form-control"
+                    type="text"
+                    placeholder="Введите название нагрузки"
+                    required
+                >
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="form-button"
+            >
+                Далее
+            </button>
+
+        </form>
+
+
+        {{ else }}
+
+        <!-- Т Т: Я  -->
+
+        <form
+            class="add-content"
+            method="POST"
+            action="/electric-car-loads/{{ .Load.ID }}/publish"
+        >
+
+            <div class="draft-media">
+
+                <div class="draft-media-item active">
+
+                    <div class="draft-media-label">
+                        Фото
+                    </div>
+
+                    <img
+                        class="draft-preview"
+                        src="{{ .Load.ImageURL }}"
+                        alt="Фото нагрузки"
+                    >
+
+                </div>
+
+
+                <div class="draft-media-item">
+
+                    <div class="draft-media-label">
+                        Видео
+                    </div>
 
                     <video
                         class="draft-video"
@@ -92,31 +162,27 @@
                         controls>
                     </video>
 
-
                 </div>
-
 
             </div>
 
 
-
             <div class="form-field">
 
-    <label for="name">
-        Название
-    </label>
+                <label for="name">
+                    Название
+                </label>
 
-    <input
-        id="name"
-        name="name"
-        class="form-control"
-        type="text"
-        placeholder="Введите название нагрузки"
-    >
+                <input
+                    id="name"
+                    name="name"
+                    class="form-control"
+                    type="text"
+                    value="{{ .Load.Name }}"
+                    readonly
+                >
 
-</div>
-
-
+            </div>
 
 
             <div class="form-field">
@@ -125,88 +191,58 @@
                     Описание
                 </label>
 
-
                 <textarea
-    id="description"
-    name="description"
-    class="form-control"
-    placeholder="Введите описание нагрузки"
-></textarea>
+                    id="description"
+                    name="description"
+                    class="form-control"
+                    placeholder="Введите описание нагрузки"
+                    required
+                >{{ .Load.Description }}</textarea>
 
+            </div><div class="form-field">
+
+                <label for="power">
+                    Мощность (Вт)
+                </label>
+
+                <input
+                    id="power"
+                    name="power"
+                    class="form-control"
+                    type="number"
+                    value="{{ .Load.PowerDrawW }}"
+                    min="0"
+                    max="10000"
+                    placeholder="Например: 500"
+                    required
+                >
 
             </div>
 
+
             <div class="form-field">
 
-<label for="category">
-Категория
-</label>
+                <label for="priority">
+                    Приоритет
+                </label>
 
-<input
-id="category"
-name="category"
-class="form-control"
-type="text"
-placeholder="Например: Отопление"
->
+                <input id="priority" name="priority" class="form-control" type="text" value="{{ .Load.Priority }}" required>
 
-</div>
+            </div>
 
 
+            <button
+                type="submit"
+                class="form-button"
+            >
+                Опубликовать
+            </button>
 
-<div class="form-field">
+        </form>
 
-<label for="power">
-Мощность (Вт)
-</label>
-
-<input
-id="power"
-name="power"
-class="form-control"
-type="number"
-placeholder="Например: 500"
->
-
-</div>
-
-
-
-<div class="form-field">
-
-<label for="priority">
-Приоритет
-</label>
-
-
-<select
-id="priority"
-name="priority"
-class="form-control"
->
-
-<option value="Высокий">
-Высокий
-</option>
-
-
-<option value="Низкий">
-Низкий
-</option>
-
-
-</select>
-
-</div>
-
-<button type="submit" class="form-button">
-    Сохранить
-</button>
-</form>
-
+        {{ end }}
 
     </main>
-
 
 
     <nav class="bottom-nav">
@@ -215,12 +251,11 @@ class="form-control"
             class="nav-item"
             href="/electric-car-loads/feed">
 
-            <span class="nav-icon">▦</span>
+            <span class="nav-icon">◻</span>
 
             Лента
 
         </a>
-
 
 
         <a
@@ -234,23 +269,24 @@ class="form-control"
         </a>
 
 
-
         <a
             class="nav-item"
             href="/electric-car-loads">
 
-            <span class="nav-icon">▦</span>
+            <span class="nav-icon">◻</span>
 
             Плитка
 
         </a>
 
-
     </nav>
-
 
 </div>
 
-
 </body>
 </html>
+
+
+
+
+

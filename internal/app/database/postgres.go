@@ -1,4 +1,4 @@
-package database
+﻿package database
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ var DB *gorm.DB
 func Connect() {
 
 	dsn := fmt.Sprintf(
-		"host=127.0.0.1 user=postgres password=postgres dbname=electric_car_loads port=5433 sslmode=disable TimeZone=Europe/Moscow",
+		"host=127.0.0.1 user=postgres password=postgres dbname=electric_car_loads port=5434 sslmode=disable TimeZone=Europe/Moscow",
 	)
 
 	db, err := gorm.Open(

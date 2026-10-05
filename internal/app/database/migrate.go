@@ -13,6 +13,8 @@ func Migrate() {
 		&model.User{},
 
 		&model.ElectricCarLoad{},
+
+		&model.Like{},
 	)
 
 	if err != nil {

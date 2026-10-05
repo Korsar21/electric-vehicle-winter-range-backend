@@ -5,25 +5,25 @@ import "time"
 type ElectricCarLoad struct {
 	ID uint `gorm:"primaryKey"`
 
-	Name string
-
+	Name        string
 	Description string
-
-	Category string
-
-	PowerDrawW int
-
-	Priority string
 
 	Status string
 
-	LikeCount int
-
 	ImageKey string
-
 	VideoKey string
 
-	CreatedAt time.Time
+	Category   string
+	PowerDrawW int
+	Priority   string
 
-	UpdatedAt time.Time
+	CreatedAt time.Time
+	FormedAt  time.Time
+
+	CreatorID uint
+	Creator   User
+
+	LikeCount int
+
+	Likes []User `gorm:"many2many:likes;"`
 }

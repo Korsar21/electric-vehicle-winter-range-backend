@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"github.com/Korsar21/electric-vehicle-winter-range-backend/internal/app/model"
 	"gorm.io/gorm"
 )
 
@@ -12,33 +13,19 @@ const (
 	StatusDeleted   ElectricCarLoadStatus = "deleted"
 )
 
-type ElectricCarLoad struct {
-	ID          int
-	Name        string
-	Description string
-	Category    string
-	PowerDrawW  int
-	Priority    string
-	Status      ElectricCarLoadStatus
-	LikeCount   int
-	ImageKey    string
-	VideoKey    string
-}
-
 type Repository struct {
 	db *gorm.DB
 }
 
 func NewRepository(db *gorm.DB) (*Repository, error) {
-
 	return &Repository{
 		db: db,
 	}, nil
 }
 
-func (r *Repository) GetPublishedElectricCarLoads(maxPowerW int) ([]ElectricCarLoad, error) {
+func (r *Repository) GetPublishedElectricCarLoads(maxPowerW int) ([]model.ElectricCarLoad, error) {
 
-	var loads []ElectricCarLoad
+	var loads []model.ElectricCarLoad
 
 	err := r.db.
 		Where(
@@ -46,15 +33,16 @@ func (r *Repository) GetPublishedElectricCarLoads(maxPowerW int) ([]ElectricCarL
 			StatusPublished,
 			maxPowerW,
 		).
+		Order("id ASC").
 		Find(&loads).
 		Error
 
 	return loads, err
 }
 
-func (r *Repository) GetPublishedElectricCarLoadByID(id int) (ElectricCarLoad, error) {
+func (r *Repository) GetPublishedElectricCarLoadByID(id int) (model.ElectricCarLoad, error) {
 
-	var load ElectricCarLoad
+	var load model.ElectricCarLoad
 
 	err := r.db.
 		Where(
@@ -68,24 +56,22 @@ func (r *Repository) GetPublishedElectricCarLoadByID(id int) (ElectricCarLoad, e
 	return load, err
 }
 
-func (r *Repository) GetDraftElectricCarLoad() (ElectricCarLoad, error) {
+func (r *Repository) GetFirstPublishedElectricCarLoad() (model.ElectricCarLoad, error) {
 
-	var load ElectricCarLoad
+	var load model.ElectricCarLoad
 
 	err := r.db.
-		Where(
-			"status = ?",
-			StatusDraft,
-		).
+		Where("status = ?", StatusPublished).
+		Order("id ASC").
 		First(&load).
 		Error
 
 	return load, err
 }
 
-func (r *Repository) GetNextPublishedElectricCarLoad(id int) (ElectricCarLoad, error) {
+func (r *Repository) GetNextPublishedElectricCarLoad(id int) (model.ElectricCarLoad, error) {
 
-	var load ElectricCarLoad
+	var load model.ElectricCarLoad
 
 	err := r.db.
 		Where(
@@ -93,6 +79,7 @@ func (r *Repository) GetNextPublishedElectricCarLoad(id int) (ElectricCarLoad, e
 			id,
 			StatusPublished,
 		).
+		Order("id ASC").
 		First(&load).
 		Error
 
@@ -103,14 +90,15 @@ func (r *Repository) GetNextPublishedElectricCarLoad(id int) (ElectricCarLoad, e
 	return load, nil
 }
 
-func (r *Repository) GetFirstPublishedElectricCarLoad() (ElectricCarLoad, error) {
+func (r *Repository) GetDraftElectricCarLoad(userID uint) (model.ElectricCarLoad, error) {
 
-	var load ElectricCarLoad
+	var load model.ElectricCarLoad
 
 	err := r.db.
 		Where(
-			"status = ?",
-			StatusPublished,
+			"creator_id = ? AND status = ?",
+			userID,
+			StatusDraft,
 		).
 		First(&load).
 		Error
@@ -118,30 +106,58 @@ func (r *Repository) GetFirstPublishedElectricCarLoad() (ElectricCarLoad, error)
 	return load, err
 }
 
-func (r *Repository) CreateElectricCarLoad(load ElectricCarLoad) error {
+// CreateElectricCarLoad СЃРѕР·РґР°С‘С‚ РёРјРµРЅРЅРѕ Р§Р•Р РќРћР’РРљ.
+// РСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ ORM.
+func (r *Repository) CreateElectricCarLoad(load *model.ElectricCarLoad) error {
 
-	if load.Status == "" {
-		load.Status = StatusPublished
-	}
+	load.Status = string(StatusDraft)
 
-	return r.db.Create(&load).Error
+	return r.db.Create(load).Error
 }
 
-func (r *Repository) DeleteElectricCarLoad(id int) error {
+// PublishElectricCarLoad Р·Р°РїРѕР»РЅСЏРµС‚ РїРѕР»СЏ РїСЂРµРґРјРµС‚РЅРѕР№ РѕР±Р»Р°СЃС‚Рё
+// Рё РїРµСЂРµРІРѕРґРёС‚ С‡РµСЂРЅРѕРІРёРє РІ published.
+// РСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ ORM.
+func (r *Repository) PublishElectricCarLoad(
+	id int,
+	description string,
+	category string,
+	powerDrawW int,
+	priority string,
+) error {
 
 	return r.db.
-		Model(&ElectricCarLoad{}).
-		Where("id = ?", id).
-		Update(
-			"status",
-			StatusDeleted,
+		Model(&model.ElectricCarLoad{}).
+		Where(
+			"id = ? AND status = ?",
+			id,
+			StatusDraft,
 		).
+		Updates(map[string]interface{}{
+			"description":  description,
+			"category":     category,
+			"power_draw_w": powerDrawW,
+			"priority":     priority,
+			"status":       StatusPublished,
+		}).
 		Error
 }
 
-func (r *Repository) GetElectricCarLoadByID(id int) (ElectricCarLoad, error) {
+// DeleteElectricCarLoad вЂ” Р•Р”РРќРЎРўР’Р•РќРќР«Р™ РјРµС‚РѕРґ СѓРґР°Р»РµРЅРёСЏ.
+// Р—РґРµСЃСЊ РЅР°РјРµСЂРµРЅРЅРѕ РќР• РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ ORM Update/Save.
+// Р’С‹РїРѕР»РЅСЏРµС‚СЃСЏ РѕР±С‹С‡РЅС‹Р№ SQL UPDATE.
+func (r *Repository) DeleteElectricCarLoad(id int) error {
 
-	var load ElectricCarLoad
+	return r.db.Exec(
+		"UPDATE electric_car_loads SET status = ? WHERE id = ?",
+		StatusDeleted,
+		id,
+	).Error
+}
+
+func (r *Repository) GetElectricCarLoadByID(id int) (model.ElectricCarLoad, error) {
+
+	var load model.ElectricCarLoad
 
 	err := r.db.
 		Where("id = ?", id).
@@ -149,23 +165,4 @@ func (r *Repository) GetElectricCarLoadByID(id int) (ElectricCarLoad, error) {
 		Error
 
 	return load, err
-}
-
-func (r *Repository) UpdateElectricCarLoad(load ElectricCarLoad) error {
-
-	return r.db.
-		Save(&load).
-		Error
-}
-
-func (r *Repository) LikeElectricCarLoad(id int) error {
-
-	return r.db.
-		Model(&ElectricCarLoad{}).
-		Where("id = ?", id).
-		UpdateColumn(
-			"like_count",
-			gorm.Expr("like_count + ?", 1),
-		).
-		Error
 }
