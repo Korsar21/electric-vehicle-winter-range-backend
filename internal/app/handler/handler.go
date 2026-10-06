@@ -350,7 +350,7 @@ func (h *Handler) PublishElectricCarLoad(ctx *gin.Context) {
 	err =
 		h.Repository.PublishElectricCarLoad(
 			id,
-			ctx.PostForm("description"),
+			defaultUserID, ctx.PostForm("description"),
 			ctx.PostForm("category"),
 			power,
 			ctx.PostForm("priority"),
@@ -393,7 +393,7 @@ func (h *Handler) DeleteElectricCarLoad(ctx *gin.Context) {
 	}
 
 	err =
-		h.Repository.DeleteElectricCarLoad(id)
+		h.Repository.DeleteElectricCarLoad(id, defaultUserID)
 
 	if err != nil {
 

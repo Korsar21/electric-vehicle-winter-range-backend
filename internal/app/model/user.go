@@ -1,8 +1,12 @@
 package model
 
-type User struct {
-	ID uint `gorm:"primaryKey"`
+import "time"
 
-	Name     string
-	Password string
+type User struct {
+	ID uint `gorm:"primaryKey" json:"id"`
+
+	Name     string `json:"name"`
+	Password string `json:"-"`
+
+	CreatedAt time.Time `json:"created_at"`
 }

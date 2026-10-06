@@ -8,7 +8,6 @@ import (
 )
 
 func NewMinioClient() (*minio.Client, error) {
-
 	client, err := minio.New(
 		"localhost:9000",
 		&minio.Options{
@@ -25,9 +24,10 @@ func NewMinioClient() (*minio.Client, error) {
 		return nil, err
 	}
 
-	_, err = client.ListBuckets(
-		context.Background(),
-	)
+	_, err = client.ListBuckets(context.Background())
+	if err != nil {
+		return nil, err
+	}
 
-	return client, err
+	return client, nil
 }
