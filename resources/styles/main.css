@@ -2457,3 +2457,108 @@ textarea.form-control {
 .load-card > form {
     margin: 0;
 }
+
+/* === LR3 FORM BUTTON FIX START === */
+
+/*
+   нопки "алее" и "публиковать".
+   диный стиль с кнопками интерфейса Recurrent.
+*/
+
+.form-button {
+    display: block;
+
+    width: 100%;
+
+    margin-top: 4px;
+    padding: 10px 14px;
+
+    border: 1px solid rgba(62, 131, 249, 0.35);
+    border-radius: 9px;
+
+    background: rgba(62, 131, 249, 0.10);
+
+    color: var(--recurrent-blue);
+
+    box-shadow:
+        0 2px 8px rgba(62, 131, 249, 0.08);
+
+    backdrop-filter: blur(6px);
+
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+
+    text-align: center;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.form-button:hover {
+    background: rgba(62, 131, 249, 0.18);
+
+    border-color: rgba(62, 131, 249, 0.55);
+
+    color: var(--recurrent-blue);
+
+    box-shadow:
+        0 4px 12px rgba(62, 131, 249, 0.14);
+
+    transform: translateY(-1px);
+}
+
+.form-button:active {
+    transform: translateY(0);
+}
+
+.form-button:focus-visible {
+    outline: 3px solid rgba(62, 131, 249, 0.18);
+    outline-offset: 2px;
+}
+
+/* === LR3 FORM BUTTON FIX END === */
+
+
+/* === LR2 FORM WIDTH FIX START === */
+
+/*
+   се поля формы должны иметь ту же рабочую ширину,
+   что и кнопки "алее" / "публиковать".
+*/
+
+.add-content {
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+.form-field {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.form-control {
+    display: block;
+
+    width: 100%;
+    max-width: 100%;
+
+    box-sizing: border-box;
+}
+
+textarea.form-control {
+    width: 100%;
+    max-width: 100%;
+
+    box-sizing: border-box;
+}
+
+/* === LR2 FORM WIDTH FIX END === */
