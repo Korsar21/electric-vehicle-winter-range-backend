@@ -1,0 +1,403 @@
+basePath: /api
+definitions:
+  handler.SwaggerUserAuthRequest:
+    properties:
+      name:
+        example: lr4_creator
+        type: string
+      password:
+        example: "123456"
+        type: string
+    type: object
+  handler.SwaggerUserAuthResponse:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        example: 3599
+        type: integer
+      name:
+        example: lr4_creator
+        type: string
+      role:
+        example: creator
+        type: string
+      token_type:
+        example: Bearer
+        type: string
+      user_id:
+        example: 3
+        type: integer
+    type: object
+  handler.SwaggerUserRegisterRequest:
+    properties:
+      name:
+        example: lr4_creator
+        type: string
+      password:
+        example: "123456"
+        type: string
+    type: object
+  handler.SwaggerUserResponse:
+    properties:
+      id:
+        example: 3
+        type: integer
+      name:
+        example: lr4_creator
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: 'REST API for electric vehicle winter loads. LR4: JWT authentication,
+    authorization and Redis blacklist.'
+  title: Electric Vehicle Winter Range API
+  version: "1.0"
+paths:
+  /electric-car-loads:
+    get:
+      description: Returns the service/load list. This endpoint is available without
+        authentication.
+      parameters:
+      - description: Category
+        in: query
+        name: category
+        type: string
+      - description: Maximum power draw in watts
+        in: query
+        name: maxPowerW
+        type: integer
+      - description: Sort order
+        in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get electric car loads
+      tags:
+      - electric-car-loads
+    post:
+      consumes:
+      - multipart/form-data
+      description: Creates a new electric car load draft for the authenticated creator.
+      parameters:
+      - description: Name
+        in: formData
+        name: name
+        required: true
+        type: string
+      - description: Description
+        in: formData
+        name: description
+        type: string
+      - description: Category
+        in: formData
+        name: category
+        type: string
+      - description: Power draw in watts
+        in: formData
+        name: power_draw_w
+        type: integer
+      - description: Priority
+        in: formData
+        name: priority
+        type: integer
+      - description: Image
+        in: formData
+        name: image
+        type: file
+      - description: Video
+        in: formData
+        name: video
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create draft
+      tags:
+      - electric-car-loads
+  /electric-car-loads/{id}:
+    delete:
+      description: Deletes the authenticated creator's load.
+      parameters:
+      - description: Load id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete load
+      tags:
+      - electric-car-loads
+    put:
+      consumes:
+      - multipart/form-data
+      description: Updates the creator's load and publishes it.
+      parameters:
+      - description: Load id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Name
+        in: formData
+        name: name
+        type: string
+      - description: Description
+        in: formData
+        name: description
+        type: string
+      - description: Category
+        in: formData
+        name: category
+        type: string
+      - description: Power draw in watts
+        in: formData
+        name: power_draw_w
+        type: integer
+      - description: Priority
+        in: formData
+        name: priority
+        type: integer
+      - description: Image
+        in: formData
+        name: image
+        type: file
+      - description: Video
+        in: formData
+        name: video
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Publish/update load
+      tags:
+      - electric-car-loads
+  /electric-car-loads/{id}/like:
+    post:
+      description: Adds/removes the authenticated creator's like.
+      parameters:
+      - description: Load id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Like load
+      tags:
+      - electric-car-loads
+  /electric-car-loads/draft:
+    get:
+      description: Returns the authenticated creator's draft.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get creator draft
+      tags:
+      - electric-car-loads
+  /electric-car-loads/feed:
+    get:
+      description: Returns a published feed item. It is available without authentication.
+      parameters:
+      - description: Current item id
+        in: query
+        name: id
+        type: integer
+      - description: Return next item
+        in: query
+        name: next
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get feed item
+      tags:
+      - electric-car-loads
+  /users/auth:
+    post:
+      consumes:
+      - application/json
+      description: Checks creator credentials and returns a JWT access token.
+      parameters:
+      - description: Credentials
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.SwaggerUserAuthRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.SwaggerUserAuthResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Authenticate user
+      tags:
+      - users
+  /users/logout:
+    post:
+      description: Revokes the current JWT by adding its jti to the Redis blacklist
+        until token expiration.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Logout user
+      tags:
+      - users
+  /users/register:
+    post:
+      consumes:
+      - application/json
+      description: Creates a creator account. Password is stored as a bcrypt hash.
+      parameters:
+      - description: Registration data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.SwaggerUserRegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handler.SwaggerUserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Register user
+      tags:
+      - users
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

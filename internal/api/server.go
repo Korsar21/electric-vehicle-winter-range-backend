@@ -3,33 +3,32 @@ package api
 import (
 	"log"
 
+	_ "github.com/Korsar21/electric-vehicle-winter-range-backend/docs"
+	"github.com/Korsar21/electric-vehicle-winter-range-backend/internal/app/auth"
 	"github.com/Korsar21/electric-vehicle-winter-range-backend/internal/app/database"
 	"github.com/Korsar21/electric-vehicle-winter-range-backend/internal/app/handler"
 	"github.com/Korsar21/electric-vehicle-winter-range-backend/internal/app/repository"
 	"github.com/Korsar21/electric-vehicle-winter-range-backend/internal/app/storage"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func StartServer() error {
-
 	log.Println("Starting server")
 
 	database.Connect()
-
 	database.Migrate()
-
 	database.Seed()
 
 	repo, err := repository.NewRepository(database.DB)
-
 	if err != nil {
 		logrus.Error("repository initialization error: ", err)
 		return err
 	}
 
 	minioClient, err := storage.NewMinioClient()
-
 	if err != nil {
 		logrus.Error("MinIO initialization error: ", err)
 		return err
@@ -37,14 +36,26 @@ func StartServer() error {
 
 	assetStorage := storage.NewAssetStorage(minioClient)
 
+	authManager, err := auth.NewManager()
+	if err != nil {
+		logrus.Error("auth initialization error: ", err)
+		return err
+	}
+
 	h := handler.NewHandler(repo)
 
 	apiHandler := handler.NewAPIHandler(
 		repo,
 		assetStorage,
+		authManager,
 	)
 
 	router := gin.Default()
+
+	router.GET(
+		"/swagger/*any",
+		ginSwagger.WrapHandler(swaggerFiles.Handler),
+	)
 
 	router.LoadHTMLGlob("templates/*")
 
@@ -53,10 +64,7 @@ func StartServer() error {
 		"./resources",
 	)
 
-	// =========================
-	// SSR / HTML — 2
-	// =========================
-
+	// SSR / HTML
 	router.GET(
 		"/electric-car-loads/feed",
 		h.GetElectricCarLoadFeed,
@@ -87,57 +95,19 @@ func StartServer() error {
 		h.GetElectricCarLoadGrid,
 	)
 
-	// =========================
-	// REST API — 3
-	// =========================
-
-	// Список опубликованных услуг + фильтрация.
+	// Public REST API.
+	// GET works both for guest and creator.
 	router.GET(
 		"/api/electric-car-loads",
+		authManager.Optional(),
 		apiHandler.GetElectricCarLoads,
 	)
 
-	// ента:
-	// /api/electric-car-loads/feed
-	// /api/electric-car-loads/feed?id=1
-	// /api/electric-car-loads/feed?id=1&next=true
 	router.GET(
 		"/api/electric-car-loads/feed",
+		authManager.Optional(),
 		apiHandler.GetElectricCarLoadFeed,
 	)
-
-	// ерновик текущего пользователя.
-	router.GET(
-		"/api/electric-car-loads/draft",
-		apiHandler.GetDraftElectricCarLoadAPI,
-	)
-
-	// Создание черновика + загрузка image/video.
-	router.POST(
-		"/api/electric-car-loads",
-		apiHandler.CreateElectricCarLoadAPI,
-	)
-
-	// убликация черновика.
-	router.PUT(
-		"/api/electric-car-loads/:id",
-		apiHandler.PublishElectricCarLoadAPI,
-	)
-
-	// Soft delete собственной услуги.
-	router.DELETE(
-		"/api/electric-car-loads/:id",
-		apiHandler.DeleteElectricCarLoadAPI,
-	)
-
-	// становка/отмена лайка.
-	router.POST(
-		"/api/electric-car-loads/:id/like",
-		apiHandler.LikeElectricCarLoadAPI,
-	)
-	// =========================
-	// USER API — 3
-	// =========================
 
 	router.POST(
 		"/api/users/register",
@@ -149,8 +119,37 @@ func StartServer() error {
 		apiHandler.AuthenticateUser,
 	)
 
-	router.POST(
-		"/api/users/logout",
+	// Creator REST API.
+	creator := router.Group("/api")
+	creator.Use(authManager.Required())
+
+	creator.GET(
+		"/electric-car-loads/draft",
+		apiHandler.GetDraftElectricCarLoadAPI,
+	)
+
+	creator.POST(
+		"/electric-car-loads",
+		apiHandler.CreateElectricCarLoadAPI,
+	)
+
+	creator.PUT(
+		"/electric-car-loads/:id",
+		apiHandler.PublishElectricCarLoadAPI,
+	)
+
+	creator.DELETE(
+		"/electric-car-loads/:id",
+		apiHandler.DeleteElectricCarLoadAPI,
+	)
+
+	creator.POST(
+		"/electric-car-loads/:id/like",
+		apiHandler.LikeElectricCarLoadAPI,
+	)
+
+	creator.POST(
+		"/users/logout",
 		apiHandler.LogoutUser,
 	)
 

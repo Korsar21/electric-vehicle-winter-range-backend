@@ -26,10 +26,11 @@ func apiError(ctx *gin.Context, code int, message string) {
 }
 
 func makeElectricCarLoadResponse(
+	ctx *gin.Context,
 	h *APIHandler,
 	load model.ElectricCarLoad,
 ) serializer.ElectricCarLoadResponse {
-	currentUserID := auth.CurrentUserID()
+	currentUserID, _ := auth.UserIDFromContext(ctx)
 
 	isCreator := 0
 	if load.CreatorID == currentUserID {
@@ -65,8 +66,8 @@ func makeElectricCarLoadResponse(
 
 // GET /api/electric-car-loads
 //
-// Только опубликованные услуги.
-// оддерживается фильтрация по максимальной мощности.
+// РўРѕР»СЊРєРѕ РѕРїСѓР±Р»РёРєРѕРІР°РЅРЅС‹Рµ СѓСЃР»СѓРіРё.
+// РѕРґРґРµСЂР¶РёРІР°РµС‚СЃСЏ С„РёР»СЊС‚СЂР°С†РёСЏ РїРѕ РјР°РєСЃРёРјР°Р»СЊРЅРѕР№ РјРѕС‰РЅРѕСЃС‚Рё.
 func (h *APIHandler) GetElectricCarLoads(ctx *gin.Context) {
 	maxPowerW := apiDefaultMaxPowerW
 
@@ -116,7 +117,7 @@ func (h *APIHandler) GetElectricCarLoads(ctx *gin.Context) {
 	for _, load := range loads {
 		response = append(
 			response,
-			makeElectricCarLoadResponse(h, load),
+			makeElectricCarLoadResponse(ctx, h, load),
 		)
 	}
 
@@ -125,9 +126,9 @@ func (h *APIHandler) GetElectricCarLoads(ctx *gin.Context) {
 
 // GET /api/electric-car-loads/feed
 //
-// ез id — первый опубликованный объект.
-// С id — конкретный объект.
-// С id и next=true — следующий опубликованный объект.
+// РµР· id вЂ” РїРµСЂРІС‹Р№ РѕРїСѓР±Р»РёРєРѕРІР°РЅРЅС‹Р№ РѕР±СЉРµРєС‚.
+// РЎ id вЂ” РєРѕРЅРєСЂРµС‚РЅС‹Р№ РѕР±СЉРµРєС‚.
+// РЎ id Рё next=true вЂ” СЃР»РµРґСѓСЋС‰РёР№ РѕРїСѓР±Р»РёРєРѕРІР°РЅРЅС‹Р№ РѕР±СЉРµРєС‚.
 func (h *APIHandler) GetElectricCarLoadFeed(ctx *gin.Context) {
 	idQuery := ctx.Query("id")
 	nextQuery := ctx.Query("next")
@@ -176,9 +177,9 @@ func (h *APIHandler) GetElectricCarLoadFeed(ctx *gin.Context) {
 		return
 	}
 
-	response := makeElectricCarLoadResponse(h, load)
+	response := makeElectricCarLoadResponse(ctx, h, load)
 
-	// роверяем, существует ли следующий опубликованный объект.
+	// СЂРѕРІРµСЂСЏРµРј, СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё СЃР»РµРґСѓСЋС‰РёР№ РѕРїСѓР±Р»РёРєРѕРІР°РЅРЅС‹Р№ РѕР±СЉРµРєС‚.
 	nextLoad, nextErr := h.Repository.GetNextPublishedElectricCarLoad(
 		int(load.ID),
 	)
@@ -192,12 +193,12 @@ func (h *APIHandler) GetElectricCarLoadFeed(ctx *gin.Context) {
 
 // GET /api/electric-car-loads/draft
 //
-// озвращает черновик текущего пользователя.
+// РѕР·РІСЂР°С‰Р°РµС‚ С‡РµСЂРЅРѕРІРёРє С‚РµРєСѓС‰РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ.
 //
-//	пользователя может быть не более одного черновика.
+//	РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РјРѕР¶РµС‚ Р±С‹С‚СЊ РЅРµ Р±РѕР»РµРµ РѕРґРЅРѕРіРѕ С‡РµСЂРЅРѕРІРёРєР°.
 func (h *APIHandler) GetDraftElectricCarLoadAPI(ctx *gin.Context) {
 	load, err := h.Repository.GetDraftElectricCarLoad(
-		auth.CurrentUserID(),
+		auth.MustUserID(ctx),
 	)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -218,18 +219,18 @@ func (h *APIHandler) GetDraftElectricCarLoadAPI(ctx *gin.Context) {
 		return
 	}
 
-	response := makeElectricCarLoadResponse(h, load)
+	response := makeElectricCarLoadResponse(ctx, h, load)
 
 	ctx.JSON(http.StatusOK, response)
 }
 
 // POST /api/electric-car-loads
 //
-// Создаёт черновик текущего пользователя.
-// name передаётся как текстовое поле.
-// image и video передаются как реальные multipart-файлы.
+// РЎРѕР·РґР°С‘С‚ С‡РµСЂРЅРѕРІРёРє С‚РµРєСѓС‰РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ.
+// name РїРµСЂРµРґР°С‘С‚СЃСЏ РєР°Рє С‚РµРєСЃС‚РѕРІРѕРµ РїРѕР»Рµ.
+// image Рё video РїРµСЂРµРґР°СЋС‚СЃСЏ РєР°Рє СЂРµР°Р»СЊРЅС‹Рµ multipart-С„Р°Р№Р»С‹.
 func (h *APIHandler) CreateElectricCarLoadAPI(ctx *gin.Context) {
-	currentUserID := auth.CurrentUserID()
+	currentUserID, _ := auth.UserIDFromContext(ctx)
 
 	_, err := h.Repository.GetDraftElectricCarLoad(currentUserID)
 
@@ -402,7 +403,7 @@ func (h *APIHandler) CreateElectricCarLoadAPI(ctx *gin.Context) {
 		return
 	}
 
-	response := makeElectricCarLoadResponse(h, load)
+	response := makeElectricCarLoadResponse(ctx, h, load)
 
 	ctx.JSON(
 		http.StatusCreated,
@@ -412,8 +413,8 @@ func (h *APIHandler) CreateElectricCarLoadAPI(ctx *gin.Context) {
 
 // PUT /api/electric-car-loads/:id
 //
-// убликация черновика.
-// Только создатель может опубликовать собственный черновик.
+// СѓР±Р»РёРєР°С†РёСЏ С‡РµСЂРЅРѕРІРёРєР°.
+// РўРѕР»СЊРєРѕ СЃРѕР·РґР°С‚РµР»СЊ РјРѕР¶РµС‚ РѕРїСѓР±Р»РёРєРѕРІР°С‚СЊ СЃРѕР±СЃС‚РІРµРЅРЅС‹Р№ С‡РµСЂРЅРѕРІРёРє.
 func (h *APIHandler) PublishElectricCarLoadAPI(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 
@@ -449,7 +450,7 @@ func (h *APIHandler) PublishElectricCarLoadAPI(ctx *gin.Context) {
 
 	err = h.Repository.PublishElectricCarLoad(
 		id,
-		auth.CurrentUserID(),
+		auth.MustUserID(ctx),
 		request.Description,
 		request.Category,
 		request.PowerDrawW,
@@ -485,15 +486,15 @@ func (h *APIHandler) PublishElectricCarLoadAPI(ctx *gin.Context) {
 		return
 	}
 
-	response := makeElectricCarLoadResponse(h, load)
+	response := makeElectricCarLoadResponse(ctx, h, load)
 
 	ctx.JSON(http.StatusOK, response)
 }
 
 // DELETE /api/electric-car-loads/:id
 //
-// Только soft delete.
-// далять можно только собственную услугу.
+// РўРѕР»СЊРєРѕ soft delete.
+// РґР°Р»СЏС‚СЊ РјРѕР¶РЅРѕ С‚РѕР»СЊРєРѕ СЃРѕР±СЃС‚РІРµРЅРЅСѓСЋ СѓСЃР»СѓРіСѓ.
 func (h *APIHandler) DeleteElectricCarLoadAPI(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 
@@ -508,7 +509,7 @@ func (h *APIHandler) DeleteElectricCarLoadAPI(ctx *gin.Context) {
 
 	err = h.Repository.DeleteElectricCarLoad(
 		id,
-		auth.CurrentUserID(),
+		auth.MustUserID(ctx),
 	)
 
 	if errors.Is(err, repository.ErrElectricCarLoadNotFound) {
@@ -537,8 +538,8 @@ func (h *APIHandler) DeleteElectricCarLoadAPI(ctx *gin.Context) {
 
 // POST /api/electric-car-loads/:id/like
 //
-// like=1 — поставить лайк.
-// like=0 — отменить лайк.
+// like=1 вЂ” РїРѕСЃС‚Р°РІРёС‚СЊ Р»Р°Р№Рє.
+// like=0 вЂ” РѕС‚РјРµРЅРёС‚СЊ Р»Р°Р№Рє.
 func (h *APIHandler) LikeElectricCarLoadAPI(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 
@@ -592,7 +593,7 @@ func (h *APIHandler) LikeElectricCarLoadAPI(ctx *gin.Context) {
 	}
 
 	err = h.Repository.SetLike(
-		auth.CurrentUserID(),
+		auth.MustUserID(ctx),
 		load.ID,
 		request.Like,
 	)
@@ -607,7 +608,7 @@ func (h *APIHandler) LikeElectricCarLoadAPI(ctx *gin.Context) {
 	}
 
 	liked, err := h.Repository.IsLiked(
-		auth.CurrentUserID(),
+		auth.MustUserID(ctx),
 		load.ID,
 	)
 
