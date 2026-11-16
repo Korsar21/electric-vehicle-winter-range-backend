@@ -47,6 +47,51 @@ definitions:
         example: lr4_creator
         type: string
     type: object
+  serializer.ElectricCarLoadPublishRequest:
+    properties:
+      category:
+        type: string
+      description:
+        type: string
+      power_draw_w:
+        type: integer
+      priority:
+        type: string
+    type: object
+  serializer.ElectricCarLoadResponse:
+    properties:
+      category:
+        type: string
+      description:
+        type: string
+      has_next:
+        type: boolean
+      id:
+        type: integer
+      image_url:
+        type: string
+      is_creator:
+        type: integer
+      is_liked:
+        type: integer
+      like_count:
+        type: integer
+      name:
+        type: string
+      power_draw_w:
+        type: integer
+      priority:
+        type: string
+      status:
+        type: string
+      video_url:
+        type: string
+    type: object
+  serializer.LikeRequest:
+    properties:
+      like:
+        type: integer
+    type: object
 host: localhost:8080
 info:
   contact: {}
@@ -68,9 +113,9 @@ paths:
         in: query
         name: maxPowerW
         type: integer
-      - description: Sort order
+      - description: Electric car load name
         in: query
-        name: sort
+        name: search
         type: string
       produces:
       - application/json
@@ -78,44 +123,30 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            items:
+              $ref: '#/definitions/serializer.ElectricCarLoadResponse'
+            type: array
       summary: Get electric car loads
       tags:
       - electric-car-loads
     post:
       consumes:
       - multipart/form-data
-      description: Creates a new electric car load draft for the authenticated creator.
       parameters:
       - description: Name
         in: formData
         name: name
         required: true
         type: string
-      - description: Description
-        in: formData
-        name: description
-        type: string
-      - description: Category
-        in: formData
-        name: category
-        type: string
-      - description: Power draw in watts
-        in: formData
-        name: power_draw_w
-        type: integer
-      - description: Priority
-        in: formData
-        name: priority
-        type: integer
       - description: Image
         in: formData
         name: image
+        required: true
         type: file
       - description: Video
         in: formData
         name: video
+        required: true
         type: file
       produces:
       - application/json
@@ -123,16 +154,10 @@ paths:
         "201":
           description: Created
           schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/serializer.ElectricCarLoadResponse'
       security:
       - BearerAuth: []
-      summary: Create draft
+      summary: Create electric car load draft
       tags:
       - electric-car-loads
   /electric-car-loads/{id}:
@@ -169,74 +194,43 @@ paths:
       - electric-car-loads
     put:
       consumes:
-      - multipart/form-data
-      description: Updates the creator's load and publishes it.
+      - application/json
       parameters:
       - description: Load id
         in: path
         name: id
         required: true
         type: integer
-      - description: Name
-        in: formData
-        name: name
-        type: string
-      - description: Description
-        in: formData
-        name: description
-        type: string
-      - description: Category
-        in: formData
-        name: category
-        type: string
-      - description: Power draw in watts
-        in: formData
-        name: power_draw_w
-        type: integer
-      - description: Priority
-        in: formData
-        name: priority
-        type: integer
-      - description: Image
-        in: formData
-        name: image
-        type: file
-      - description: Video
-        in: formData
-        name: video
-        type: file
+      - description: Fields
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/serializer.ElectricCarLoadPublishRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties: true
-            type: object
-        "403":
-          description: Forbidden
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/serializer.ElectricCarLoadResponse'
       security:
       - BearerAuth: []
-      summary: Publish/update load
+      summary: Publish electric car load
       tags:
       - electric-car-loads
   /electric-car-loads/{id}/like:
     post:
+      consumes:
+      - application/json
       description: Adds/removes the authenticated creator's like.
       parameters:
+      - description: Like state
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/serializer.LikeRequest'
       - description: Load id
         in: path
         name: id
@@ -257,7 +251,7 @@ paths:
             type: object
       security:
       - BearerAuth: []
-      summary: Like load
+      summary: Like electric car load
       tags:
       - electric-car-loads
   /electric-car-loads/draft:
@@ -269,8 +263,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/serializer.ElectricCarLoadResponse'
         "401":
           description: Unauthorized
           schema:
@@ -304,8 +297,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/serializer.ElectricCarLoadResponse'
       summary: Get feed item
       tags:
       - electric-car-loads

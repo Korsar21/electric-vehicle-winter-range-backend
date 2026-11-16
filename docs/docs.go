@@ -40,8 +40,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Sort order",
-                        "name": "sort",
+                        "description": "Electric car load name",
+                        "name": "search",
                         "in": "query"
                     }
                 ],
@@ -49,8 +49,10 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/serializer.ElectricCarLoadResponse"
+                            }
                         }
                     }
                 }
@@ -61,7 +63,6 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Creates a new electric car load draft for the authenticated creator.",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -71,7 +72,7 @@ const docTemplate = `{
                 "tags": [
                     "electric-car-loads"
                 ],
-                "summary": "Create draft",
+                "summary": "Create electric car load draft",
                 "parameters": [
                     {
                         "type": "string",
@@ -81,55 +82,25 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "Description",
-                        "name": "description",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Category",
-                        "name": "category",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Power draw in watts",
-                        "name": "power_draw_w",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Priority",
-                        "name": "priority",
-                        "in": "formData"
-                    },
-                    {
                         "type": "file",
                         "description": "Image",
                         "name": "image",
-                        "in": "formData"
+                        "in": "formData",
+                        "required": true
                     },
                     {
                         "type": "file",
                         "description": "Video",
                         "name": "video",
-                        "in": "formData"
+                        "in": "formData",
+                        "required": true
                     }
                 ],
                 "responses": {
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/serializer.ElectricCarLoadResponse"
                         }
                     }
                 }
@@ -154,8 +125,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/serializer.ElectricCarLoadResponse"
                         }
                     },
                     "401": {
@@ -203,8 +173,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/serializer.ElectricCarLoadResponse"
                         }
                     }
                 }
@@ -217,9 +186,8 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Updates the creator's load and publishes it.",
                 "consumes": [
-                    "multipart/form-data"
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -227,7 +195,7 @@ const docTemplate = `{
                 "tags": [
                     "electric-car-loads"
                 ],
-                "summary": "Publish/update load",
+                "summary": "Publish electric car load",
                 "parameters": [
                     {
                         "type": "integer",
@@ -237,75 +205,20 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "Name",
-                        "name": "name",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Description",
-                        "name": "description",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Category",
-                        "name": "category",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Power draw in watts",
-                        "name": "power_draw_w",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Priority",
-                        "name": "priority",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "file",
-                        "description": "Image",
-                        "name": "image",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "file",
-                        "description": "Video",
-                        "name": "video",
-                        "in": "formData"
+                        "description": "Fields",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/serializer.ElectricCarLoadPublishRequest"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/serializer.ElectricCarLoadResponse"
                         }
                     }
                 }
@@ -366,14 +279,26 @@ const docTemplate = `{
                     }
                 ],
                 "description": "Adds/removes the authenticated creator's like.",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "electric-car-loads"
                 ],
-                "summary": "Like load",
+                "summary": "Like electric car load",
                 "parameters": [
+                    {
+                        "description": "Like state",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/serializer.LikeRequest"
+                        }
+                    },
                     {
                         "type": "integer",
                         "description": "Load id",
@@ -595,6 +520,75 @@ const docTemplate = `{
                 "name": {
                     "type": "string",
                     "example": "lr4_creator"
+                }
+            }
+        },
+        "serializer.ElectricCarLoadPublishRequest": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "power_draw_w": {
+                    "type": "integer"
+                },
+                "priority": {
+                    "type": "string"
+                }
+            }
+        },
+        "serializer.ElectricCarLoadResponse": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "has_next": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "image_url": {
+                    "type": "string"
+                },
+                "is_creator": {
+                    "type": "integer"
+                },
+                "is_liked": {
+                    "type": "integer"
+                },
+                "like_count": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "power_draw_w": {
+                    "type": "integer"
+                },
+                "priority": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "video_url": {
+                    "type": "string"
+                }
+            }
+        },
+        "serializer.LikeRequest": {
+            "type": "object",
+            "properties": {
+                "like": {
+                    "type": "integer"
                 }
             }
         }

@@ -33,10 +33,17 @@ func NewRepository(db *gorm.DB) (*Repository, error) {
 // ELECTRIC CAR LOADS
 // =========================
 
-func (r *Repository) GetPublishedElectricCarLoads(maxPowerW int) ([]model.ElectricCarLoad, error) {
+func (r *Repository) GetPublishedElectricCarLoads(maxPowerW int, filters ...string) ([]model.ElectricCarLoad, error) {
 	var loads []model.ElectricCarLoad
 
-	err := r.db.
+	query := r.db
+	if len(filters) > 0 && filters[0] != "" {
+		query = query.Where("name ILIKE ?", "%"+filters[0]+"%")
+	}
+	if len(filters) > 1 && filters[1] != "" {
+		query = query.Where("category = ?", filters[1])
+	}
+	err := query.
 		Where(
 			"status = ? AND power_draw_w <= ?",
 			StatusPublished,

@@ -1,5 +1,9 @@
 package handler
 
+import "github.com/Korsar21/electric-vehicle-winter-range-backend/internal/app/serializer"
+
+var _ serializer.ElectricCarLoadResponse
+
 // These small types exist only so swag can generate clear request schemas
 // without depending on internal serializer type resolution.
 type SwaggerUserAuthRequest struct {
@@ -66,8 +70,8 @@ func swaggerLogout() {}
 // @Produce json
 // @Param category query string false "Category"
 // @Param maxPowerW query int false "Maximum power draw in watts"
-// @Param sort query string false "Sort order"
-// @Success 200 {object} map[string]interface{}
+// @Param search query string false "Electric car load name"
+// @Success 200 {array} serializer.ElectricCarLoadResponse
 // @Router /electric-car-loads [get]
 func swaggerGetLoads() {}
 
@@ -77,7 +81,7 @@ func swaggerGetLoads() {}
 // @Produce json
 // @Param id query int false "Current item id"
 // @Param next query bool false "Return next item"
-// @Success 200 {object} map[string]interface{}
+// @Success 200 {object} serializer.ElectricCarLoadResponse
 // @Router /electric-car-loads/feed [get]
 func swaggerGetFeed() {}
 
@@ -86,48 +90,32 @@ func swaggerGetFeed() {}
 // @Tags electric-car-loads
 // @Produce json
 // @Security BearerAuth
-// @Success 200 {object} map[string]interface{}
+// @Success 200 {object} serializer.ElectricCarLoadResponse
 // @Failure 401 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
 // @Router /electric-car-loads/draft [get]
 func swaggerGetDraft() {}
 
-// @Summary Create draft
-// @Description Creates a new electric car load draft for the authenticated creator.
+// @Summary Create electric car load draft
 // @Tags electric-car-loads
 // @Accept multipart/form-data
 // @Produce json
 // @Security BearerAuth
 // @Param name formData string true "Name"
-// @Param description formData string false "Description"
-// @Param category formData string false "Category"
-// @Param power_draw_w formData int false "Power draw in watts"
-// @Param priority formData int false "Priority"
-// @Param image formData file false "Image"
-// @Param video formData file false "Video"
-// @Success 201 {object} map[string]interface{}
-// @Failure 401 {object} map[string]interface{}
+// @Param image formData file true "Image"
+// @Param video formData file true "Video"
+// @Success 201 {object} serializer.ElectricCarLoadResponse
 // @Router /electric-car-loads [post]
 func swaggerCreateLoad() {}
 
-// @Summary Publish/update load
-// @Description Updates the creator's load and publishes it.
+// @Summary Publish electric car load
 // @Tags electric-car-loads
-// @Accept multipart/form-data
+// @Accept json
 // @Produce json
 // @Security BearerAuth
 // @Param id path int true "Load id"
-// @Param name formData string false "Name"
-// @Param description formData string false "Description"
-// @Param category formData string false "Category"
-// @Param power_draw_w formData int false "Power draw in watts"
-// @Param priority formData int false "Priority"
-// @Param image formData file false "Image"
-// @Param video formData file false "Video"
-// @Success 200 {object} map[string]interface{}
-// @Failure 401 {object} map[string]interface{}
-// @Failure 403 {object} map[string]interface{}
-// @Failure 404 {object} map[string]interface{}
+// @Param body body serializer.ElectricCarLoadPublishRequest true "Fields"
+// @Success 200 {object} serializer.ElectricCarLoadResponse
 // @Router /electric-car-loads/{id} [put]
 func swaggerPublishLoad() {}
 
@@ -143,7 +131,9 @@ func swaggerPublishLoad() {}
 // @Router /electric-car-loads/{id} [delete]
 func swaggerDeleteLoad() {}
 
-// @Summary Like load
+// @Summary Like electric car load
+// @Accept json
+// @Param body body serializer.LikeRequest true "Like state"
 // @Description Adds/removes the authenticated creator's like.
 // @Tags electric-car-loads
 // @Produce json

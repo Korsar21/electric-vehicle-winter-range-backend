@@ -33,7 +33,7 @@ func makeElectricCarLoadResponse(
 	currentUserID, _ := auth.UserIDFromContext(ctx)
 
 	isCreator := 0
-	if load.CreatorID == currentUserID {
+	if currentUserID > 0 && load.CreatorID == currentUserID {
 		isCreator = 1
 	}
 
@@ -97,7 +97,7 @@ func (h *APIHandler) GetElectricCarLoads(ctx *gin.Context) {
 		maxPowerW = value
 	}
 
-	loads, err := h.Repository.GetPublishedElectricCarLoads(maxPowerW)
+	loads, err := h.Repository.GetPublishedElectricCarLoads(maxPowerW, ctx.Query("search"), ctx.Query("category"))
 
 	if err != nil {
 		apiError(
